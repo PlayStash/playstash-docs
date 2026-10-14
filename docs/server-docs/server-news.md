@@ -2,28 +2,15 @@
 sidebar_position: 11
 ---
 
-# Server News
+# Server news
 
-You can keep your users informed by adding a `news.md` file. Use it to link your game wishlist form, share key updates, or simply greet them.
+Your installation's server news is Markdown stored in `/config/news.md`, or `data/config/news.md` beside the supplied Compose file. Add library announcements or links there; do not replace the config directory mount.
 
-This file supports [Markdown](https://wikipedia.org/wiki/Markdown) syntax, making it easy to format and structure your content. You can edit the `news.md` file using any text editor or script. It is located at `/config/news.md`. If you're using Docker, simply mount that folder as a volume:
+Administrators can edit server news in the client's News dialog: open the newspaper icon, select **Server News**, and use **Edit**. The editor saves through the backend. Product/release news is a separate view bundled from the client repository's changelog; it is not a central remote-news subscription.
 
-:::note
-When updating the `news.md` file., users will receive a notification ping-icon in their client, ensuring they see the latest news.
-:::
+## API
 
-```yaml
-[...]
-volumes:
-    - /your/config/folder:/config
-    - [...]
-[...]
-```
+- `GET /api/config/news`: read news for a signed-in permitted user; returns 404 if no file exists.
+- `PUT /api/config/news`: Admin-only replacement with `{ "content": "Markdown text" }`.
 
-## Managing News via API
-
-Starting with `v16.3.0`, administrators can update server news directly via API. Only users with the **Admin** role can update news. The server must be able to write to your config volume (`VOLUMES_CONFIG`).
-
-## Editing News in the Client
-
-Starting with `v17.0.0`, the GameVault client includes a built-in **News Editor** for administrators. Open the News dialog (newspaper icon in the sidebar) and switch to the **Server News** tab: admins see an **Edit** button that opens a Markdown editor with a preview. Changes are saved back to the server's `news.md` file via the API, so you no longer need to edit the file manually. Only users with the **Admin** role can edit server news.
+The backend must be able to write its config directory. File edits by a host administrator also work; preserve the service account's permissions. Back up `data/config/` with the rest of the installation.

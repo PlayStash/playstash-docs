@@ -1,24 +1,39 @@
-# GameVault Website
-![logo](https://gamevau.lt/img/logo-text-and-image-sbs.png)
-[You can find the official Website/Documentation here](https://gamevau.lt)
+# PlayStash Documentation
 
-## Local Development
+This private repository contains current PlayStash documentation and its
+Docusaurus website source. Start with [the overview](docs/intro.md) or
+[server installation](docs/server-docs/setup/setup.md).
 
-```bash
+The documentation covers Backend 17.1.4, Web/Desktop Frontend 17.2.3 and Windows
+application 1.18.1: separate frontend/API containers, PostgreSQL, no subscription.
+
+- [Steam, IGDB, metadata and covers](docs/server-docs/metadata-enrichment/metadata.md)
+- [Clients and installers](docs/client-docs/setup.md)
+- [Privacy and external services](docs/privacy.md)
+- [Security checks](docs/security.md)
+- [Authentication](docs/advanced-usage/authentication.md)
+- [Builds and maintenance](docs/advanced-usage/development.md)
+
+## Local website
+
+Use the Node.js and pnpm versions declared in package.json:
+
+```sh
+pnpm install --frozen-lockfile
 pnpm start
+pnpm build
 ```
 
-This command starts a local development server and opens up a browser window. Most changes are reflected live without having to restart the server.
+GitHub-hosted workflows check dependencies, secrets, content and the production
+website on main/dev and pull requests. They upload a private Actions artifact.
+No public website is deployed automatically; the default URL is a build setting.
 
-## License
+Only main and dev are maintained and synchronized. PLAYSTASH_RUN_SELF_HOSTED
+is false; it does not block hosted jobs. Read [AGENTS.md](AGENTS.md) and update
+[CHANGELOG.md](CHANGELOG.md) with changes visible to readers.
 
-[![CC BY-NC-SA 4.0][cc-by-nc-sa-shield]][cc-by-nc-sa]
+## Attribution and license
 
-This work is licensed under a
-[Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License][cc-by-nc-sa].
-
-[![CC BY-NC-SA 4.0][cc-by-nc-sa-image]][cc-by-nc-sa]
-
-[cc-by-nc-sa]: http://creativecommons.org/licenses/by-nc-sa/4.0/
-[cc-by-nc-sa-image]: https://licensebuttons.net/l/by-nc-sa/4.0/88x31.png
-[cc-by-nc-sa-shield]: https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg
+Derived from documentation by Alkan Alper, Schäfer Philip GbR / Phalcode and
+contributors. Attribution and the original license are preserved in
+[NOTICE.txt](NOTICE.txt) and [LICENSE](LICENSE): CC BY-NC-SA 4.0.

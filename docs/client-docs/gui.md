@@ -1,190 +1,181 @@
 ---
+title: Interface overview
 sidebar_position: 98
 ---
 
-# GUI Overview
+The browser and Tauri desktop client share the React interface. The separate WPF
+Windows application has its own layout. Native-only controls are hidden or disabled
+in browser sessions, and server roles determine access to shared editing and
+administration.
 
-This documentation provides a clear overview of the Graphical User Interface (GUI) for GameVault. The GUI encompasses various tabs, each offering distinct functionalities.
+## Login window
 
-## Login Window
-
-See more [here](setup.md#initial-configuration)
+See [Initial configuration](./setup.md#initial-configuration) for browser/Tauri
+sign-in, WPF profiles and server-configured SSO. The current WPF application supports
+multiple profiles without a paid subscription; the Tauri sign-in flow does not
+use that WPF profile chooser.
 
 ## Library
 
-!["Library Tab"](/img/features/library.png)
+Browse games, search, sort and apply filters. In the cross-platform interface,
+local categories can save combinations of tag and folder filters. Installed-game
+controls appear in the desktop client. Open a game card to see its details; its
+`Settings` gear opens the game settings dialog.
 
-- Browse available and installed games.
-- Expand or collapse sections with expanders.
-- Launch installed games by clicking the play button on box art.
-- Download available games by clicking the download button on box art.
-- Access game settings directly with the Settings icon.
-- The paged Library loads a maximum of 80 games at once for bandwidth efficiency.
-- Use the dice icon to open a random game on the server.
-- Employ the Filter icon for server game filtering.
-- Utilize the search bar to find specific games.
+The library is fetched in pages. There is no universal fixed 80-game page-size
+promise across clients. Restricted games remain subject to server authorization;
+a local category cannot bypass those restrictions.
 
 ## Game
 
-!["Game Page"](/img/features/game.png)
+The cross-platform game page includes description/media, progress and relevant
+metadata, with `Requirements`, `Reviews`, `Package & extras` and `Saves` tabs.
+You can submit public five-star reviews and change your own progress state.
+Downloaded/installed-game controls require native client support.
 
-- View game details, including a media player for trailers, gameplay videos, and screenshots
-- Descriptions and Notes can also be displayed as Markdown.
-- Set progress states (e.g., completed or aborted).
-- Review personal progress and that of other users
-- Add games to the download queue or launch installed games.
-- Bookmark the game or create a share link
-- Navigate back to the Library Tab using the back-arrow button or `ESC` key.
+`Package & extras` provides extra downloads, explicitly selected installer recipes,
+ordered optional addons and named launch profiles. The `Saves` tab manages ZIP
+save versions. See [How to use](./how-to-use.md) and
+[Integrations and save versions](./integrations.md) for the differences between clients.
 
-## Game Settings
+## Game settings
 
-### Your Computer
+### Your computer
 
-- Settings affecting local game installations.
+Native game settings manage the installation directory, uninstall action,
+executable selection and launch parameters. The Tauri dialog includes
+`Installation` and `Launch Options`; Linux compatibility options are available
+where relevant. These settings affect the local computer rather than the entire
+server library.
 
-#### Installation
-
-- View installation directory.
-- Uninstall games.
-- Check disk usage for the game.
-
-#### Launch Options
-
-- Set default executable and launch parameters.
-- Create desktop shortcuts.
+The WPF application also offers its own local launch settings, launch-profile
+selection, desktop/launcher actions and `Emulator / ROM` configuration. It does
+not provide an emulator or automatically classify ROMs.
 
 ### Server
 
-- Settings affecting all users on the server (visible to editors or higher).
+Editors and administrators can use shared game metadata controls. Current
+cross-platform labels include:
 
-#### Edit Game Images
+- `Edit Images`: upload or provide URLs for covers/backgrounds, then `Save Images`.
+- `Metadata`: inspect providers and use `Search & Remap` to select a correct match.
+- `Custom Metadata`: override shared fields and `Save Custom Metadata`.
+- Administrator-only access controls: restrict a game and select allowed users.
 
-- Set a different thumbnail/background image using URLs or uploads. Has also a button to simplify the search for box/background images
-
-#### Metadata
-
-!["Metadata"](/img/features/gamesettings_metadata.png)
-
-- View available metadata providers.
-- Change metadata providers priority.
-- Unmap metadata providers. If unmaped the header text will be grayed out a bit and the action buttons are disabled.
-- Recache selected metadata provider.
-- Switch metadata from selectd metadata providers in the "Remap Game" section.
-
-#### Custom Metadata
-
-!["Custom Metadata"](/img/features/gamesettings_custom_metadata.png)
-
-- Have full control of all the specific game details such as description, genres, tags etc including a preview of the current set data.
-- Click the relead icon beside a game detail to load the current values into the textbox.
-- Clear all user overwritten details by clicking the related button on the top right.
-  :::note Format
-  Multiple entries such as genres, tags etc. must be separated by a comma.
-  :::
+Provider activation and credentials are backend configuration, not a form in this
+dialog. See the [metadata guide](../server-docs/metadata-enrichment/metadata.md)
+for setup, priorities and refreshing the library.
 
 ## Downloads
 
-!["Downloads Tab"](/img/features/downloads.png)
+The Tauri desktop sidebar includes `Downloads` for its download, extraction and
+installation workflow. Pause/resume, cancel/retry and installation controls depend
+on the current card state. The browser sidebar does not show this native download
+manager; direct file downloads are handled by the browser.
 
-- Monitor running and completed downloads.
-- View download statistics and progress.
-- Abort downloads.
-- Extract game archives and view extraction progress.
-- Perform installations based on game types.
-- Open download folders and delete downloaded files.
+The WPF application has a separate `Downloads` view and a different game-root
+layout. Its installation controls are documented in [How to use](./how-to-use.md).
 
-## Community
+## Community and chat
 
-!["Community Tab"](/img/features/community.png)
+`Community` shows users and their accessible progress. `Chat` provides a lobby,
+game rooms and direct messages, with presence options such as busy and invisible.
+Game-room access follows game permissions. Chat requires the server's activity/chat
+gateway and a reverse proxy that forwards WebSockets.
 
-- View all users on the GameVault Server.
-- Select users for detailed game progress information.
-- Sort and delete progresses.
-- Edit user details and reload progresses.
+Chat history is temporary, retained for up to 24 hours and lost on server restart.
+In the React frontend, presence is published while the chat page is connected.
+The WPF application has separate community notification settings; do not assume
+every presence or notification setting is shared between clients.
 
-## User Settings
+## Requests
 
-### Edit User Images
+`Requests` lets authenticated users request additions to the library and inspect
+responses/status. The anonymous option hides the requester's identity in the
+request presentation; it does not make this an unauthenticated public request form.
+Administrators can update request status. These are library requests, not a shop
+or payment workflow.
 
-- Set avatar/background images using URLs or uploads.
+## User settings
 
-### Edit Details
-
-- View and update user details.
-- Update passwords with confirmation.
-- Copy API key of your own user.
+Use your profile/account controls to edit permitted account details and user
+images. Authentication, passwords, activation and roles are handled by your
+PlayStash server. The WPF application provides `Settings → User → Edit User`,
+profile switching, and logout actions for this device or all devices.
 
 ## Settings
 
-Settings are organized into categories and opened from the sidebar (gear icon).
+The cross-platform interface offers searchable settings with the current categories:
 
-### Downloads
+| Category | Main controls |
+| --- | --- |
+| `Downloads` | Speed limit, image cache; native root locations, automatic extraction/installation/cleanup, post-install script |
+| `Appearance` | Interface language, system/light/dark theme, zoom, Streamer / OPSEC Mode |
+| `Sound` | Local interface volume and sound preview |
+| `Startup` | Desktop startup and minimized-start behavior |
+| `Games` | Desktop launch behavior, ignore list and launch logs; Linux Wine/Proton prefix location |
+| `Privacy` | Account game-action reporting, restricted activity sharing, usage-analytics consent |
+| `About` | Version, licenses and system information |
+| `Developer Tools` | Optional troubleshooting and development controls |
 
-Everything about storing and downloading your games:
+Desktop-only groups are not offered as browser capabilities. Five quick clicks on
+the version number reveal the React Developer Tools category. Optional verbose
+diagnostics is for troubleshooting; it is independent of ordinary hang recovery.
 
-- Configure the download bandwidth limit.
-- Select the download and installation root folders.
-- Set if you want to auto-extract downloaded games and set a default password for encrypted archives.
-- Set if portable games should be auto-installed and if the install files should be auto-deleted.
+The WPF application organizes settings into `Application`, `Installation`, `User`,
+`Data`, `Integrations`, `About` and developer controls. `Application` contains the
+interface language, fullscreen library, startup audio and theme generator. `Data`
+contains game roots and cache controls. `Integrations` configures Steam shortcuts,
+Discord presence and automatic cloud saves.
 
-### Library
+### Languages
 
-- Settings that shape your game library (e.g. retain sorting and filter preferences after restart).
+Browser/Tauri: open `Settings → Appearance → Interface language` and choose device
+default, English or German. Translated controls update immediately. Navigation and
+appearance controls are translated; other pages, dynamic messages and server/game
+content are not fully translated. Missing entries and unsupported device languages
+fall back to English.
 
-### Privacy & Analytics
+WPF: choose `Settings → Application → Interface Language`, then restart the
+application. English and initial German catalogs cover common static labels;
+missing translations and some dynamic messages remain English.
 
-- Decide what information GameVault shares with the outside (analytics and error reporting).
+### Privacy
 
-### Appearance
+`Report completed game actions` sends selected lifecycle events to your own
+server. `Share restricted game activity` changes account activity sharing and is
+disabled by default. These controls are separate from `Help improve PlayStash`.
 
-- Change the client theme (dark/light).
-- Adjust the UI zoom level.
-
-### Sound
-
-- Control volume and sound effects in GameVault.
-
-### Startup (Desktop Only)
-
-- Launch GameVault on computer startup.
-- Minimize GameVault to the system tray when closing the window. The app keeps running in the background so playtime tracking continues.
-
-### Ignore List
-
-- View and edit the list of executables GameVault should skip (used by the playtime tracker).
-
-### Developer Tools
-
-- Hidden utilities for development and testing. Unlock them by tapping the version number 5 times.
-
-### About
-
-- Show the application version, the update channel, and the automatic update status (desktop clients).
-- Browse the third-party open-source licenses.
-
-:::note Legacy Windows App
-The legacy Windows app organizes its settings into the tabs **Application**, **Installation**, **User**, and **Data** (root directories, image/offline cache, ignored executables, ISO mounting, and theme installation).
-:::
+The published frontend has no configured usage-analytics endpoint/project, so
+enabling that local consent switch alone does not enable external analytics.
+A custom build can configure its own endpoint. See [Privacy](../privacy.md) for
+what information goes where, including independent external font/media requests.
 
 ## Administration
 
-!["Admin Tab"](/img/features/admin.png)
+Administrators can manage users and roles, activation, deletion/restoration,
+automatic folder-tag rules and server actions. Current cards include `Actions`
+with `Reindex Games`, and `Server diagnostics` with `Read server logs` and
+`Refresh all metadata`.
 
-- Visible to admins only.
-- View, activate/deactivate, and edit user roles.
-- Delete or restore users.
-- Open Community Tab profile by clicking on users' avatars.
-- Re-index games on the server.
+Reindexing scans game files; metadata refresh contacts the configured providers.
+Update the web interface by replacing its frontend container, not by restarting
+an embedded backend web interface.
 
 ## News
 
-!["News"](/img/features/news.png)
-
-- At the bottom left of the screen is a button with which you can display the latest news from gamevault or the server's own news.
-- When new news are available the button will be marked with a red badged.
-- News can also be displayed as Markdown.
-- Administrators can edit the server's news with the built-in News Editor (Markdown supported). Changes are saved to the server's `news.md` file.
+Product news is bundled from the PlayStash frontend changelog. Server news comes
+from your connected backend. The news control displays available entries; an
+administrator can edit the server's news. It does not subscribe the client to an
+upstream demo or a separate vendor account.
 
 ## Gamepad
 
-Starting with `v17.0.0`, the client supports **gamepad navigation**. Connect a gamepad and use the D-pad or left stick to move the focus between UI elements: the **A** button confirms/activates the focused element and the **B** button goes back. A visible focus ring shows the currently selected element while navigating with a gamepad.
+The cross-platform library provides Big Picture mode from the library heading or
+the controller Start button. D-pad/stick navigation moves focus, A activates and
+B goes back. A connected controller and support in the current environment are
+required; this does not emulate a controller inside a game.
+
+The WPF application provides `Open Fullscreen Library` and an option to open it
+at startup under `Settings → Application`. These are distinct implementations;
+see each client's local settings rather than expecting identical layouts.

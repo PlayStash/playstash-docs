@@ -2,97 +2,26 @@
 sidebar_position: 8
 ---
 
-# Media
+# Covers, backgrounds and media
 
-This page outlines how media like images and videos are handled within the backend application.
+Game covers/backgrounds and user avatars/backgrounds are stored in the backend's `/media` volume, mapped to `data/media/` by Compose. Screenshot, trailer and gameplay URL lists can point to external resources; loading those URLs contacts their hosts.
 
-## Supported Formats
+For manual artwork, open a game, choose the **Settings** gear, then **Edit Images → Cover** or **Background**. Upload/drop/paste an image or enter an image URL, then select **Save Images**. This requires the relevant editing role. See [metadata providers](metadata-enrichment/metadata.md) for automatically supplied artwork.
 
-### Supported Image Formats
+## Uploads and conversion
 
-| Format  | Name                        | MIME Type                  |
-| ------- | --------------------------- | -------------------------- |
-| `.bmp`  | Bitmap Image                | `image/bmp`      |
-| `.jpeg` | JPEG Image                  | `image/jpeg`     |
-| `.png`  | Portable Network Graphics   | `image/png`      |
-| `.tiff` | Tagged Image File Format    | `image/tiff`     |
-| `.gif`  | Graphics Interchange Format | `image/gif`      |
-| `.ico`  | Icon Format                 | `image/x-icon`   |
+`MEDIA_MAX_SIZE` defaults to `10mb`. The default stored MIME types include BMP, JPEG, PNG, TIFF, GIF and ICO images; MP3/WAV/OGG/AAC/FLAC/WMA/AMR/MP4 audio; and MP4/AVI/MOV/WMV/FLV/MKV/WebM/MPEG/3GP video. An accepted file type does not guarantee playback support in every browser/client.
 
-### Supported Audio Formats
+Decodable WebP, AVIF, TIFF and other images outside the configured stored formats are converted to an allowed PNG/JPEG/WebP output. Passive SVG is rasterized; scripts, active elements and external SVG/XML references are rejected. Image dimensions, processing time and both input/output size are limited. This is image normalization, not arbitrary video/audio transcoding.
 
-| Format  | Name                      | MIME Type        |
-| ------- | ------------------------- | ---------------- |
-| `.mp3`  | MPEG Audio                | `audio/mpeg`     |
-| `.wav`  | Waveform Audio            | `audio/wav`      |
-| `.ogg`  | Ogg Vorbis                | `audio/ogg`      |
-| `.aac`  | Advanced Audio Codec      | `audio/aac`      |
-| `.flac` | Free Lossless Audio Codec | `audio/flac`     |
-| `.wma`  | Windows Media Audio       | `audio/x-ms-wma` |
-| `.amr`  | Adaptive Multi-Rate       | `audio/amr`      |
-| `.mp4`  | MPEG-4 Audio              | `audio/mp4`      |
+Remote artwork URLs must be HTTP(S), without embedded credentials, and resolve to public addresses on every redirect. Private-network artwork should be uploaded as a file instead. Remote requests have a bounded timeout/size; a configured media size of zero still leaves a 64 MiB fallback for remote downloads.
 
-### Supported Video Formats
+## Authorized caching
 
-| Format  | Name                   | MIME Type          |
-| ------- | ---------------------- | ------------------ |
-| `.mp4`  | MPEG-4 Video           | `video/mp4`        |
-| `.avi`  | Audio Video Interleave | `video/x-msvideo`  |
-| `.mov`  | QuickTime              | `video/quicktime`  |
-| `.wmv`  | Windows Media Video    | `video/x-ms-wmv`   |
-| `.flv`  | Flash Video            | `video/x-flv`      |
-| `.mkv`  | Matroska Video         | `video/x-matroska` |
-| `.webm` | WebM Video             | `video/webm`       |
-| `.mpeg` | MPEG Video             | `video/mpeg`       |
-| `.3gp`  | 3GPP Multimedia File   | `video/3gpp`       |
+`GET /api/media/:id` checks authentication and relevant game permissions before streaming or returning a conditional response. It uses `Cache-Control: private, no-cache` with ETag/Last-Modified support so cached pixels are reused only after authorization is rechecked. Do not replace this with public/shared-cache artwork rules at your proxy.
 
-## Media Persistence
+## Cleanup and backups
 
-GameVault stores media either by persisting them to the filesystem using the media directory (by default `/media`) or by saving a link to an external URL.
+Media cleanup removes database entries without references and files without matching database records. The default interval is 60 minutes. Set `MEDIA_GC_DISABLED=true` to disable it, or adjust `MEDIA_GC_INTERVAL_IN_MINUTES`.
 
-### Media that is stored on the filesystem
-
-- `game_metadata.cover`: Game Box Arts
-- `game_metadata.background`: Game Background Images
-- `gamevault_user.avatar`: User Avatars
-- `gamevault_user.background`: User Background Images
-
-### Media that is stored as an external resource
-
-- `game_metadata.url_screenshots`: Game Screenshots
-- `game_metadata.url_trailers`: Game Trailers
-- `game_metadata.url_gameplays`: Gameplay Videos
-
-:::note
-Note the `url_` prefix.
-:::
-
-### Duplicate Media
-
-GameVault stores each media resource referenced in the database as one-to-one, with no media reuse. So it's normal to see duplicates.
-
-## HTTP Caching
-
-Media files are immutable: their unique id never changes. Starting with `v17.0.0`, the media endpoint (`/api/media/:id`) therefore serves files with long-lived HTTP caching, so clients can reuse covers and artwork without re-downloading them:
-
-- Responses include `Cache-Control: public, max-age=31536000, immutable`.
-- `ETag` and `Last-Modified` headers are set based on the file on disk.
-- Conditional requests (`If-None-Match` / `If-Modified-Since`) are answered with `304 Not Modified`.
-
-This is fully transparent for API consumers and requires no configuration.
-
-## Media Garbage Collection
-
-:::danger Potential data loss
-Garbage collection **can result in data loss**, as it will **delete any files inside the media folder** without an association in the database. For example if you set up a new, empty database. It is advisable to regularly back up your media just to be safe. If you don't want to lose any data, you can disable garbage collection by setting the `MEDIA_GC_DISABLED` environment variable to `true`.
-:::
-
-GameVault regularly cleans up its media in the database and filesystem to keep things tidy. We call this process garbage collection.
-
-You can control how often the garbage colletion happens by changing the value of `MEDIA_GC_INTERVAL_IN_MINUTES`.
-
-During cleanup, GameVault first gets rid of all media in the database that aren't used. Afterwards, it deletes all media files in the media folder that don't match any database entries. So please don't put any files in the media folder that you don't want to be deleted.
-
-### Turning off Garbage Collection
-
-If you want to turn off this feature, you can disableit by setting the `MEDIA_GC_DISABLED` environment variable to `true`.
+Use `data/media/` only for managed media. Files you place there manually without a database reference may be deleted by cleanup. Back up the media directory together with the matching database; starting with an empty database can make old media unreferenced.

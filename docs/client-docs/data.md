@@ -1,80 +1,124 @@
 ---
+title: Data management
 sidebar_position: 4
 ---
 
-# Data Management
+Server data and local client data are separate. Games, accounts, provider metadata,
+shared images and uploaded save versions live on your server. Client settings,
+caches, authentication state and installed games live on your computer. See
+[Server persistence](../server-docs/configuration.md) and [Privacy](../privacy.md)
+for server configuration and information exchange.
 
-This page gives you an overview of how GameVault stores and manages its data.
+## Browser sessions
 
-The **legacy Windows app** stores its data at:
+The browser keeps interface preferences, cached user information and session
+persistence in storage for the instance's origin. Persistent refresh tokens use
+browser local storage. Clearing that site's data removes local preferences and
+can require another login; it does not delete server accounts, games or saves.
 
-- `%USERPROFILE%\AppData\Local\Packages\Phalcode.174950BD81C41_dymsgn3qpfjxc\LocalCache\Roaming\GameVault\` when installed from the Microsoft Store
-- `%APPDATA%\GameVault` otherwise
+Direct downloads use the browser's download directory. The browser does not
+create the native PlayStash game-root layout.
 
-The **cross-platform client** stores its data in the platform's standard application-data directory under `com.phalcode.gamevault`:
+## Cross-platform desktop client
 
-- **Windows**: `%APPDATA%\com.phalcode.gamevault`
-- **Linux**: `~/.local/share/com.phalcode.gamevault` (data) and `~/.config/com.phalcode.gamevault` (configuration)
-- **macOS**: `~/Library/Application Support/com.phalcode.gamevault`
+The Tauri application's identifier is `com.playstash.playstash`. Its native
+application-data directory follows the operating system's standard directories:
 
-Its settings live in `gamevault-settings.json` inside that directory, and cached media (covers, background images) is kept in the webview's local storage/IndexedDB.
+| Platform | Default application-data location |
+| --- | --- |
+| Windows | `%APPDATA%\com.playstash.playstash` |
+| Linux | `$XDG_DATA_HOME/com.playstash.playstash`, normally `~/.local/share/com.playstash.playstash` |
+| macOS | `~/Library/Application Support/com.playstash.playstash` |
 
-:::note
-The paths in the sections below apply to the **legacy Windows app**.
-:::
+Native settings such as startup behavior, ignored executables, compatibility
+preferences and the post-install script are stored in `playstash-settings.json`.
+Other interface preferences, including download roots, theme, language and update
+channel, are kept in the webview's local storage. These are separate stores; the
+JSON file alone is not a full settings backup.
 
-:::warning Don't modify unless you know what you're doing
-Please be aware that manually altering this data may lead to unwanted issues in GameVault.
-:::
+### Authentication
 
-## Image Cache
+Native refresh tokens are stored in the encrypted `vault.hold` Stronghold vault,
+not in webview local storage. Its automatic-unlock password is a separate private
+`vault-password` file in the application-local-data directory. On Windows that
+can be under `%LOCALAPPDATA%\com.playstash.playstash`, distinct from `%APPDATA%`.
+Protect both locations when backing up client state. If vault persistence fails,
+the app keeps the current session in memory rather than silently saving the token
+as plaintext.
 
-> Located under: `%USERPROFILE%\AppData\Local\Packages\Phalcode.174950BD81C41_dymsgn3qpfjxc\LocalCache\Roaming\GameVault\cache\images` or `%APPDATA%\GameVault\cache\images`
+### Offline cache
 
-GameVault caches all loaded images locally for faster retrieval. They're kept in a specific subfolder with a format like "ParentID.ImageID," where the ParentID could represent the Game ID or User ID. This unique ImageID allows GameVault to detect when an image becomes outdated (e.g., when another user modifies a game's box art). When you request that image again, the cache is immediately updated.
+`offline-cache/` in the application-data directory contains cached game JSON and
+images used for offline browsing of downloaded or installed games. Image caching
+is separated by server namespace. It is a cache, not a server database backup.
+A server connection is still needed for current provider data, chat, new library
+items and save uploads.
 
-### Image Cache Optimization
+### Downloaded and installed games
 
-When you launch the GameVault Client, it performs an image optimization process. This process efficiently adjusts all cached images to match your screen size, leading to faster loading times and reduced storage usage.
+Game files live under the download locations you selected, outside the normal
+application-data directory:
 
-## Offline Cache (Progresses)
+```text
+<Root>/PlayStash/<Title>/.playstash.metadata.json
+<Root>/PlayStash/<Title>/Versions/<Version>/.playstash.game.config.json
+<Root>/PlayStash/<Title>/Versions/<Version>/Download/
+<Root>/PlayStash/<Title>/Versions/<Version>/Extraction/
+<Root>/PlayStash/<Title>/Versions/<Version>/Installation/
+```
 
-> Located under: `%USERPROFILE%\AppData\Local\Packages\Phalcode.174950BD81C41_dymsgn3qpfjxc\LocalCache\Roaming\GameVault\cache\prgs` or `%APPDATA%\GameVault\cache\prgs`
+The generated metadata and version configuration identify local installations
+and launch options. Keep them with the game when moving or backing it up. Shared
+archive passwords can be part of cached game metadata, so treat that metadata as
+private rather than publishing the complete folder as a generic template.
 
-Even when your application or your GameVault Server is offline, as long as the GameVault Client is running in the background, it continues to track your playtime. This data is sent to the server the next time you or the server is online.
+The Linux compatibility prefix base is separately configurable under
+`Settings → Games → Wine/Proton Prefix Directory`. Its default is
+`$XDG_DATA_HOME/PlayStash/prefixes`, normally `~/.local/share/PlayStash/prefixes`.
+A prefix can contain game saves and Windows configuration; it is not merely a
+replaceable image cache.
 
-## Offline Cache (Game Metadata)
+### Logs
 
-> Located under: `%USERPROFILE%\AppData\Local\Packages\Phalcode.174950BD81C41_dymsgn3qpfjxc\LocalCache\Roaming\GameVault\cache\local` or `%APPDATA%\GameVault\cache\local`
+`Settings → Games → Launch logs` provides access to native launch diagnostics.
+Launch and tracker logs use the platform's application-log directory. Developer
+Tools offers optional verbose diagnostics; keep it off unless you need that
+additional troubleshooting detail. Review log contents before sharing them.
 
-After downloading a game, GameVault stores the game's metadata locally **once**. This allows you to see all game details even when your application or the server is offline. There is currently no way to refresh the cached metadata of a game.
+## Windows application profiles
 
-## Settings
+The WPF application uses `%APPDATA%\PlayStash`, independently of Tauri:
 
-> Located under: `%USERPROFILE%\AppData\Local\Packages\Phalcode.174950BD81C41_dymsgn3qpfjxc\LocalCache\Roaming\GameVault\config\user` or `%APPDATA%\GameVault\config\user`
+| Path below `%APPDATA%\PlayStash` | Purpose |
+| --- | --- |
+| `profileconfig` | Profile chooser configuration |
+| `profiles/<server-key>/ImageCache/` | Shared image cache for that server |
+| `profiles/<server-key>/<profile-id>/config/user` | That profile's account and client preferences |
+| `profiles/<server-key>/<profile-id>/config/web/` | Embedded browser state for authentication flows |
+| `profiles/<server-key>/<profile-id>/config/cloudsave/` | Local save-tool configuration |
+| `profiles/<server-key>/<profile-id>/cache/prgs` | Pending offline progress |
+| `profiles/<server-key>/<profile-id>/cache/local` | Locally cached game metadata |
+| `profiles/<server-key>/<profile-id>/cache/ignorelist` | Executables ignored by local tracking |
+| `profiles/<server-key>/<profile-id>/themes/` | Imported themes for that profile |
+| `errorlog/` | Application error logs |
 
-All GameVault settings are stored and retrieved in a user file. Sensitive data is encrypted for security.
+The installer program directory, normally `%LOCALAPPDATA%\Programs\PlayStash`,
+is separate from these profiles. Portable packages still use the profile directory;
+copying only the program ZIP does not copy your saved profiles.
 
-## Embedded Browser Settings
+WPF game roots contain `PlayStash\Downloads` and `PlayStash\Installations`, using
+per-game ID/title folders. Local `playstash-metadata` and `playstash-exec` files
+record extraction and launch state. Keep game saves separately backed up before
+uninstalling or deleting an installation.
 
-> Located under: `%USERPROFILE%\AppData\Local\Packages\Phalcode.174950BD81C41_dymsgn3qpfjxc\LocalCache\Roaming\GameVault\config\web` or `%APPDATA%\GameVault\config\web`
+## Clearing data and moving installations
 
-GameVault's embedded browser settings are stored in the web folder. The embedded browser is used for the GameVault+ login functionality. You can delete this folder if you wish to clear all browser data. This will also log you out of your Phalcode account.
+Use client controls to clear image caches, remove a download, uninstall a game or
+change a configured root. Those are different actions. Clearing an image cache
+should not be treated as uninstalling a game; deleting a profile or game directory
+has broader consequences.
 
-## Ignore List
-
-> Located under: `%USERPROFILE%\AppData\Local\Packages\Phalcode.174950BD81C41_dymsgn3qpfjxc\LocalCache\Roaming\GameVault\cache\ignorelist` or `%APPDATA%\GameVault\cache\ignorelist`
-
-The Ignore List includes commonly encountered false positives of sidecar-executables, such as `setup.exe`, `UnityCrashHandler.exe` or `uninstall.exe`. This list is retrieved from the server if not already present. It's used by the playtime tracker for instance to avoid counting `setup.exe` as playtime. Furthermore, these executables are hidden in the selection list within the installation tab, ensuring that only game-related executables are shown. You can also edit the Ignore List locally by opening the "ignorelist" file and adding your own entries to be excluded.
-
-## Crash Logs
-
-> Located under: `%USERPROFILE%\AppData\Local\Packages\Phalcode.174950BD81C41_dymsgn3qpfjxc\LocalCache\Roaming\GameVault\errorlog` or `%APPDATA%\GameVault\errorlog`
-
-The Crash Logs are generated when an unhandled error occurs in GameVault. They can be used to debug issues or to provide support.
-
-## Themes
-
-> Located under: `%USERPROFILE%\AppData\Local\Packages\Phalcode.174950BD81C41_dymsgn3qpfjxc\LocalCache\Roaming\GameVault\themes` or `%APPDATA%\GameVault\themes`
-
-Here you can import your custom themes. To learn more about custom themes, refer to [Custom Themes Guide](../gamevault-plus/themes.md#custom-themes).
+Exit the desktop client before copying its settings or moving a game root. Keep
+the complete game tree and its generated configuration, add the destination root
+in that same client, then check that the installation and launch path are detected.
+Do not assume one client's folder structure will be imported by the other client.

@@ -1,85 +1,20 @@
 ---
-sidebar_position: 2.5
+sidebar_position: 2.6
 ---
 
-# Game Types
+# Game types
 
-GameVault recognizes various **Game Types**, which affect how the application handles games, particularly during installation.
+A game type describes how a client should install or launch a package. The backend detects it from a filename override, manifest or executable names. It never executes the installation itself.
 
-The Game Type is automatically detected, but users can manually override it using the correct type tag, based on [GameVault’s Naming Structure](structure.md). Each game can only have one type tag; if multiple tags are present, only one will be applied.
+| Type | Filename tag | Detection/use |
+| --- | --- | --- |
+| `WINDOWS_SETUP` | `(W_S)` | Windows installer: setup/autorun/install/unarc executable or an installer MSI. Single `.exe` files default to this type. |
+| `WINDOWS_PORTABLE` | `(W_P)` | Windows executable package with no detected setup pattern. |
+| `WINDOWS_SOFTWARE` | `(W_SW)` | Explicitly tagged Windows software/tool package. |
+| `LINUX_PORTABLE` | `(L_P)` | Shell script/AppImage package without a Windows executable; single `.sh`/`.appimage` files also use this type. |
+| `LINUX_SOFTWARE` | `(L_SW)` | Explicitly tagged Linux software/tool package. |
+| `UNDETECTABLE` | No type tag | No supported executable pattern was detected; install/select executables manually in the client. |
 
-## Supported Game Types
+Installer detection recognizes `setup.exe`, `autorun.exe`, `setup_*.exe`, `setup-*.exe`, `install.exe`, `unarc.exe`, and `.msi` names that do not identify redistributables. Nested archives are not inspected recursively for executable detection.
 
-:::info
-Additional game types, such as ROMs and Android applications, may be added in the future.  
-You can request more game types [here](https://github.com/Phalcode/gamevault-backend/issues/new).
-:::
-
-### Windows
-
-#### Setup (W_S)
-
-Windows Setup games require an installation process before play, initiated by setup-related files such as `setup.exe`.
-
-- **Detection**: Identified through the type tag override or by specific setup-related executables in the archive.
-- **File Patterns**:
-  - `setup.exe`
-  - `autorun.exe`
-  - `setup_*.exe` (e.g., `setup_game.exe`)
-  - `setup-*.exe` (e.g., `setup-game.exe`)
-  - `install.exe`
-  - `unarc.exe`
-  - `.msi` files (excluding those containing `redist`)
-
-- **Example Files in Archive**:
-  - `data.bin`
-  - `data2.bin`
-  - `setup.exe`
-
-#### Portable (W_P)
-
-Portable Windows games can be played immediately without requiring a setup.
-
-- **Detection**: Recognized through the type tag override or by the presence of `.exe` and `.msi` files, lacking setup-specific filenames.
-- **Example Files in Archive**:
-  - `Butcher_Data/`
-  - `Butcher.exe`
-
-#### Software (W_SW)
-
-Windows software applications or utilities that are not games but need to be managed in GameVault (like launchers, tools, or emulators).
-
-- **Detection**: Manually set through the type tag override `(W_SW)` in the filename.
-- **Example Use Cases**:
-  - Game launchers (Steam, GOG Galaxy, etc.)
-  - Emulators
-  - Game-related utilities and tools
-
-### Linux
-
-#### Portable (L_P)
-
-Linux Portable games can be played immediately without additional setup.
-
-- **Detection**: Determined by the type tag override or by the presence of `.sh` or `.appimage` files, with no `.exe` or `.msi` files.
-- **Example Files in Archive**:
-  - `Butcher_Data/`
-  - `Butcher.sh`
-
-#### Software (L_SW)
-
-Linux software applications or utilities that are not games but need to be managed in GameVault (like launchers, tools, or emulators).
-
-- **Detection**: Manually set through the type tag override `(L_SW)` in the filename.
-- **Example Use Cases**:
-  - Game launchers (Steam, Lutris, etc.)
-  - Emulators
-  - Game-related utilities and tools
-
-### Undetected
-
-This is the default type if GameVault cannot automatically detect the game type. Users will need to manually install the game into the installation folder.
-
-- **Example Files in Archive**:
-  - `data/`
-  - `run.c64`
+Use only one type tag. A manifest's `type` can use one of the enum names above; see [package manifests](packages.md). A macOS installer for the PlayStash **client** does not imply an additional macOS game-type enum. Actual game compatibility depends on the target system, game and client runtime.

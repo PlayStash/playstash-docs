@@ -2,41 +2,20 @@
 sidebar_position: 5.5
 ---
 
-# Deleting Games
+# Deleting games
 
-You can remove games either by deleting files from `/files` or by using the API. Game progress and metadata are kept, so re-adding a game later is possible.
+Deleting a game version removes its actual files. Make a backup before deleting a package you want to preserve.
 
-## Deleting a Game via Filesystem
+## Filesystem removal
 
-Delete the game files in your files directory (default: `/files`).
+Remove the chosen archive from `games/`. If other versions remain, the shared game stays visible. If none remain, the next scan/integrity check soft-deletes the game entity while preserving its associated metadata/progress for a later matching import.
 
-- If at least one version file is still there, the game remains visible.
-- If no version files are left, the game is soft-deleted on the next indexing cycle.
+For an unpacked game version, its entire package folder represents that version. This includes related data, `Extras` and `Addons`; review the folder before deleting it.
 
-### Example (Filesystem)
+## Administrator API
 
-Example:
+`DELETE /api/game/:game_id/versions/:version_id` deletes exactly one version from disk. Only administrators can call it, and demo mode disables the action. The backend must have writable game storage.
 
-- `Minecraft (v1.0.0) (2011).zip`
-- `Minecraft (v1.1.0) (2011).zip`
+Read `versions[]` from `GET /api/games/:game_id` to select the intended version. Other versions remain; the server can choose another default. There is no bulk delete-all-versions endpoint. To remove every version, remove them individually or remove their files from game storage.
 
-Delete only `v1.0.0` → game stays.
-Delete `v1.1.0` as well → game is soft-deleted on next indexing.
-
-
-## Deleting a Game via API
-
-Admins can delete game files via API. With multi-version support, deletion is version-specific.
-
-Behavior:
-
-- `GET /api/games/:game_id` returns the available version entries in `versions[]`.
-- `DELETE /api/game/:game_id/versions/:version_id` deletes exactly one version file from disk.
-- If other version files remain, the game stays visible and another version may become the default download.
-- If no files remain, the game is soft-deleted on the next indexing or integrity-check cycle.
-
-There is currently no bulk API endpoint that deletes all versions of a game in one call. To fully remove a game through the API, delete each version individually or remove the files from `/files`.
-
-Only **Admin** users can call this endpoint, and the server needs write access to `VOLUMES_FILES`.
-
-See [API docs](../advanced-usage/rest-api.md) for full endpoint details.
+Do not delete `data/postgres/`, `data/media/` or other storage directories to remove a game. Those directories contain shared installation data, not just that game's package.

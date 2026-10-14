@@ -1,0 +1,47 @@
+name: Build documentation
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docs-build-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: "24"
+          cache: pnpm
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Audit all production and development dependencies
+        run: pnpm audit --audit-level=low
+      - name: Verify the bounded brace-parser security backport
+        run: pnpm check:security
+      - name: Verify documentation source contracts
+        run: pnpm check:docs
+      - name: Build documentation with strict link checks
+        run: pnpm build
+      - name: Verify rendered links, local resources, downloads and licenses
+        run: pnpm check:site
+      - name: Keep static documentation for authorized download
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: playstash-docs-${{ github.run_id }}-${{ github.run_attempt }}-${{ github.sha }}
+          path: build/
+          if-no-files-found: error
+          retention-days: 30

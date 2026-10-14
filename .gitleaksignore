@@ -1,0 +1,7 @@
+# Four immutable upstream documentation findings contain truncated JWT samples
+# ending in a literal ellipsis, not usable access or refresh credentials.
+# Only these exact commit/path/rule/line fingerprints are excluded.
+73eee4eda8c0175d95ff55b6c4d3116411e0d41a:docs/advanced-usage/authentication.md:generic-api-key:48
+73eee4eda8c0175d95ff55b6c4d3116411e0d41a:docs/advanced-usage/authentication.md:generic-api-key:49
+fe07b61d890cd8e6a96a90d2233223e66ca68e1d:docs/advanced-usage/authentication.md:generic-api-key:48
+fe07b61d890cd8e6a96a90d2233223e66ca68e1d:docs/advanced-usage/authentication.md:generic-api-key:49

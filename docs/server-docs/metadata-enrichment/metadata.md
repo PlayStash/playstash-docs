@@ -1,80 +1,203 @@
 ---
-title: Enriching your Games with Metadata
+title: Metadata, covers and game descriptions
 sidebar_position: 0.01
 ---
 
-Research shows that nobody wants to see blank placeholder images and missing descriptions in their library. We want those games enriched with some **juicy metadata**.
+PlayStash obtains metadata through the backend. Configure providers on the server;
+the web interface currently has no form for adding provider credentials. The
+supplied Compose starts the server without contacting a live metadata provider:
+Steam is disabled by default, and IGDB needs your credentials.
 
-GameVault supports a **vast plugin framework** that supports connecting to various metadata providers simultaneously. In the following sections, you'll learn how to set up a metadata provider and get started.
+The built-in live providers are Steam and IGDB. `RAWG (Legacy)` is a compatibility
+entry and does not fetch new metadata. SteamGridDB and other services are not
+built-in providers.
 
-## Setting Up a Metadata Provider
+- [Steam configuration and supplied metadata](./provider-steam.md)
+- [IGDB setup and supplied metadata](./provider-igdb.md)
 
-**Click on any of the entries below to get to their dedicated page.**
+Editors and administrators can edit shared game metadata and mappings. The full
+library refresh requires an administrator.
 
-### Built-In Metadata Providers
+## Enable Steam
 
-- [**IGDB (via Client-ID and Client-Secret)**](./provider-igdb.md)
+Steam needs only `METADATA_STEAM_ENABLED: "true"` in the backend environment,
+followed by applying the Compose change. No Steam account, API key or additional
+container is required. The backend needs outbound HTTPS access to the Steam Store
+and its image servers.
 
-### Community-Maintained Metadata Providers
-- [**VNDB** by AlmostEasyGoing](https://github.com/AlmostEasyGoing/Gamevault-VNDB-Plugin)
-- [More to come... Click here to add your plugin!](#developing-a-new-metadata-provider-plugin)
+Edit the **existing** `playstash-backend.environment` mapping in your
+`docker-compose.yml`. Add the Steam entry alongside the existing database and
+authentication settings; do not add a second `environment` block or replace
+those settings. This excerpt shows the location in the supplied Compose:
 
-## How Metadata Enrichment in GameVault Works
+```yaml
+services:
+  playstash-backend:
+    # Keep this service's existing image, volumes and other settings.
+    environment:
+      DB_SYSTEM: POSTGRESQL
+      DB_HOST: db
+      DB_USERNAME: playstash
+      DB_DATABASE: playstash
+      DB_PASSWORD_FILE: /run/playstash-secrets/postgres-password
+      AUTH_SEED_PERSIST: "true"
+      PUID: "${PUID:-1000}"
+      PGID: "${PGID:-1000}"
+      METADATA_STEAM_ENABLED: "true"
+```
 
-The GameVault Server includes a metadata service that allows various Metadata Provider Plugins to register. Each provider registers with a numerical priority value - the higher the priority, the more important the metadata is treated.
+Then run from the directory containing the Compose file:
 
-After [indexing the games](../indexing), GameVault automatically searches for relevant metadata. It uses a standard interface search method to find games on the metadata provider (often based on Game Title and Release Year) and determines the best match using a probability index calculated with an NLP Levenshtein algorithm and the release-year-offset. The further away the title and release date, the less probable the match. For each game file, only one game can be mapped per metadata provider.
+```sh
+docker compose up -d
+```
 
-## Editing Metadata
+Compose recreates the backend with the changed environment. Existing users,
+games and persistent data are retained. To fetch metadata for existing games
+immediately, follow [Refresh your library](#refresh-your-library).
 
-To edit metadata, Users need to have the role `EDITOR` or higher. Data provided by users are always treated with **the highest priority**. Only one user-provided metadata object per game is allowed and it is the same for all users. This can be used to fill in missing data manually or change it.
+Adding `METADATA_STEAM_ENABLED=true` to `.env` alone does not enable the provider
+in the supplied Compose. Compose uses `.env` for interpolation; an arbitrary key
+is not automatically passed into a container. Put the value under the backend's
+`environment`, or reference it there explicitly, for example:
 
-## Remapping a Game
+```yaml
+      METADATA_STEAM_ENABLED: "${METADATA_STEAM_ENABLED:-false}"
+```
 
-It is possible to search the registered Metadata Providers to find a better matching game and remap the current match to it.
+Steam supplies descriptions, images, genres, developers, publishers, screenshots,
+trailers and system requirements where available. Its cover comes from Steam's
+wide header image; you can replace it manually with a portrait cover.
 
-## Unmapping a Game
+## Enable IGDB
 
-It is possible to unmap a game from a Metadata Provider, which will disconnect the mapped metadata from the game.
+Create a Twitch developer application with client type `Confidential`, then
+obtain its Client ID and Client Secret. Twitch requires two-factor authentication.
+The redirect URL is not used by IGDB; its setup guide tells you to use `localhost`.
+See the [official IGDB setup guide](https://api-docs.igdb.com/#account-creation).
 
-## How GameVault Merges Metadata
+Add these entries to the **same existing backend environment mapping**:
 
-GameVault always applies the metadata detached and by priority, by creating an **effective** metadata object `game.metadata`. We call this process "merging". It works as follows:
+```yaml
+      METADATA_IGDB_ENABLED: "true"
+      METADATA_IGDB_CLIENT_ID: "YOUR_CLIENT_ID"
+      METADATA_IGDB_CLIENT_SECRET: "YOUR_CLIENT_SECRET"
+```
 
-Let's say we have a game: "Grand Theft Auto: San Andreas" with two Metadata Providers and a user-provided edit.
+Run `docker compose up -d` again. PlayStash obtains and renews the access token
+itself. Keep the secret on the server and out of committed configuration. You can
+also use a mounted secret file as described under [Configuration alternatives](#configuration-alternatives).
 
-| Provider | Priority | Title                         | Description                                        | Age Rating |
-| -------- | -------- | ----------------------------- | -------------------------------------------------- | ---------- |
-| STEAM    | 1        | Grand Theft Auto: San Andreas | All you had to do is to follow the damn train, CJ. | 18         |
-| IGDB     | 2        | Grand Theft Auto: San Andreas | I'll have two number 9s, a number 9 large...       |            |
-| USER     | ∞        | N/A                           | N/A                                                | 12         |
+IGDB supplies covers, descriptions, screenshots, genres, developer and publisher
+information, and other available game details. Without both credentials, IGDB is
+inactive even though its enable flag defaults to `true`. Setting its enable flag
+to `false` disables fetching even when credentials are present.
 
-GameVault begins creating the "effective" metadata object by starting with the lowest priority provider and working its way up. In our case, the lowest priority provider is Steam with a priority of 1.
+Steam and IGDB can run together. Your server contacts the configured providers
+to search for games, fetch metadata and download images. A provider cannot supply
+metadata for a game it does not list, and provider outages may delay updates.
 
-So the generated metadata object initially looks like this:
+## Refresh your library
 
-| Provider  | Title                         | Description                                        | Age Rating |
-| --------- | ----------------------------- | -------------------------------------------------- | ---------- |
-| GameVault | Grand Theft Auto: San Andreas | All you had to do is to follow the damn train, CJ. | 18         |
+After enabling a provider, sign in as an administrator and open:
 
-Next, the IGDB provider is used. As you can see, it has a different description, but the age rating is missing. GameVault will overwrite the description with the more important one. However, the missing age rating will be ignored, as some data from a lower priority provider is always preferred over having no data in a field. So the merged metadata object now looks like:
+`Administration → Server diagnostics → Refresh all metadata → Queue refresh`
 
-| Provider  | Title                         | Description                                  | Age Rating |
-| --------- | ----------------------------- | -------------------------------------------- | ---------- |
-| GameVault | Grand Theft Auto: San Andreas | I'll have two number 9s, a number 9 large... | 18         |
+The server processes games in the background. Use `Read server logs` or
+`Refresh logs` in the same card to inspect progress. Large libraries take time
+because provider rate limits still apply. A successfully queued refresh does not
+mean every remote provider request has already completed.
 
-Finally, we get to the user-provided metadata. This one is special because the user always has the highest priority. So it will always be used. In our case, we want to let our underage kid play some San Andreas, so we overwrote the age rating to 12. Again, missing fields will be ignored.
+The refresh preserves your chosen provider mappings and manual metadata, bypasses
+the normal metadata cache age, and clears provider response caches. It does not
+delete games or rebuild the file index. Games with `(NC)` in a version's file path
+remain excluded from provider fetching. Provider errors are logged while the
+remaining games continue. Another full refresh while a batch is active is rejected.
 
-So the merged metadata object now looks like:
+`Administration → Actions → Reindex Games` scans game files. It is a separate
+operation from refreshing metadata.
 
-| Provider  | Title                         | Description                                  | Age Rating |
-| --------- | ----------------------------- | -------------------------------------------- | ---------- |
-| GameVault | Grand Theft Auto: San Andreas | I'll have two number 9s, a number 9 large... | 12         |
+For API clients, administrators can call `POST /api/metadata/recache`. HTTP 202
+reports `{ "queued_games": 123, "processing": true }`; another concurrent batch
+returns HTTP 409. An empty queue reports `processing: false`.
 
-This is the final result. The merge is done by the GameVault Server.
+## Correct an incorrect match
 
-The server will trigger a new merge whenever a relevant metadata object is changed (e.g., Edit of Game Metadata, Recache, Remap, etc.).
+Open the game and select its `Settings` gear, then open:
 
-## Developing a New Metadata Provider Plugin
+`Game Settings → Metadata → provider → Search & Remap`
 
-[Click here](../plugins.md) to learn how to develop your own metadata provider plugin.
+Search for the correct title and choose `Remap` on the correct result. Steam also
+accepts a numeric Steam App ID or an exact HTTPS Steam Store app URL, such as
+`https://store.steampowered.com/app/620/`. IGDB accepts titles and numeric IGDB game
+IDs. Provider IDs belong to their respective providers and are not interchangeable.
+
+Provider selection and mapping belong to each game. Enabling the provider itself
+still requires the server configuration above. If an enabled provider does not
+appear, check the backend configuration and server logs; IGDB is not registered
+when its credentials are missing.
+
+## Set your own covers and descriptions
+
+For a cover, open:
+
+`Game Settings → Edit Images → Cover`
+
+Upload an image or use `Paste image URL`, then choose `Save Images`.
+`Find Images` opens an image search; it does not add another automatic provider.
+
+For the title, description or other manual fields, use:
+
+`Game Settings → Custom Metadata → Save Custom Metadata`
+
+Manual metadata overrides provider values and remains intact during a full
+provider refresh. Image downloads and uploads remain subject to the server's
+media validation and size limits.
+
+## Optional provider settings
+
+| Setting | Default |
+| --- | --- |
+| `METADATA_STEAM_ENABLED` | `false` |
+| `METADATA_STEAM_PRIORITY` | `5` |
+| `METADATA_STEAM_REQUEST_INTERVAL_MS` | `1000` |
+| `METADATA_IGDB_ENABLED` | `true`; both credentials also required |
+| `METADATA_IGDB_PRIORITY` | `10` |
+| `METADATA_IGDB_REQUEST_INTERVAL_MS` | `250` |
+| `METADATA_TTL_IN_DAYS` | `30` |
+
+Higher priority provider values take precedence when both providers supply the
+same field. Explicit manual metadata has the highest precedence. Keep provider
+priorities distinct. A game's provider priority override can change that game's
+merge order.
+
+Intervals are measured in milliseconds. Preserve the defaults unless you
+understand the provider's limits; IGDB documents a limit of four requests per
+second. Normal refreshes reuse metadata until its configured cache age expires;
+the full administrator refresh bypasses that age while preserving request limits.
+
+## Configuration alternatives
+
+The backend also reads these keys from mounted `/config/config.yaml` or
+`/config/config.yml`, which is `data/config/` beside the supplied Compose file.
+For example, put this in `data/config/config.yaml`:
+
+```yaml
+METADATA_STEAM_ENABLED: true
+```
+
+Restart the backend after changing this file:
+
+```sh
+docker compose restart playstash-backend
+```
+
+Explicit environment values override YAML, so remove a conflicting environment
+entry if you want YAML to supply that value. If both YAML filenames exist, the
+backend reads `config.yaml` first.
+
+For credentials, `<KEY>_FILE` reads a file mounted into the backend and takes
+precedence over the direct environment value. For example,
+`METADATA_IGDB_CLIENT_SECRET_FILE: /run/secrets/igdb-client-secret` reads the secret
+from that container path. You must provide the corresponding secret or read-only
+file mount yourself; the supplied Compose does not create IGDB credentials.

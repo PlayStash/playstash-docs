@@ -2,37 +2,18 @@
 sidebar_position: 10
 ---
 
-# Parental Control
+# Age and selected-user access
 
-GameVault supports a parental control feature that **hides** games and game progresses based on the games age rating for some users. **By default**, age restrictions are **disabled**.
+Age restrictions are disabled by default. Set `PARENTAL_AGE_RESTRICTION_ENABLED: "true"` under the backend environment block and recreate it with `docker compose up -d` to enable them. Supply birth dates for existing users; new registration then requires a birth date.
 
-**When enabled:**
+Non-admin users cannot access games above their age rating, including related progress, downloads, media and package assets. Admins can access the full library. Do not assign children the Admin role. Games without a minimum-age rating remain visible, so review missing/incorrect ratings manually.
 
-- Users will **not be able** to see **games** above their age rating.
-- Users will **not be able** to see any **progresses** for games above their age rating.
+Metadata-provider priorities determine the effective rating when several providers supply it; manual user metadata overrides provider values. An editor/admin can adjust a game's custom metadata. Verify the effective minimum age in the client rather than assuming a provider's rating covers every package.
 
-:::warning Things to keep in mind
+`PARENTAL_AGE_OF_MAJORITY` defaults to 18. Below that age, birth-date changes require an administrator; adult users can edit their own birth date.
 
-- If you **enable** parental control, **do not forget** to set the **birth date** for **existing** users.
-- Children **must not** be of **role** `ADMIN`, because users with **ADMIN** role can **always see all games**, regardless of age rating.
-- The age rating value for games is set by the **metadata providers you use**. It is in your responsibility to check how the providers determine the age rating.
-- **Games without an age rating** will be **visible to everyone**. If you use parental control, make sure to apply an age rating to your games if you want to restrict access.
-- If you use multiple metadata providers, the provider with the **highest priority** will be used to determine the age rating. **User-set** age ratings will **always override** the metadata providers setting. You can check the actively applied minimum age on the game page in your client.
+## Selected-user restrictions
 
-:::
+A game's shared metadata can also set `access_restricted: true` with `allowed_user_ids`. This is independent of age. Only those users and admins see the game and associated resources; an empty allowed list makes it admin-only. Use [shared library options](library-options.md) for the exact fields.
 
-## Enabling Parental Control
-
-To enable parental control, set the `PARENTAL_AGE_RESTRICTION_ENABLED` environment variable to `true`. Then set the birth date for all existing users.
-
-Keep in mind that, when you set this variable to `true`, new users will also be required to set their Birth date upon registration.
-
-## Changing the Age of Majority
-
-The age of majority determines the age at which an individual is legally recognized as an adult. Reaching the age of majority **enables users to alter their birth date**. Otherwise, users will not be able to set their own birth date and an admin will be required to set their birth date.
-
-You can configure the age of majority for parental control by setting the `PARENTAL_AGE_OF_MAJORITY` environment variable. The default value is `18`.
-
-## Overriding the Age Rating of a Game
-
-Admins can override the age rating of a single game by simply editing the age rating field of a game directly.
+`share_restricted_activity` is off by default. A player must opt in before other permitted users can see their private-game activity/progress and before admins can inspect that player's restricted-game metrics. [Chat](websockets.md), [reviews](feedback.md), saves and downloads recheck current game access rather than relying on an older cached list.

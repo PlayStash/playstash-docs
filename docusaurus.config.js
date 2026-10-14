@@ -1,239 +1,77 @@
 // @ts-check
-// Note: type annotations allow type checking and IDEs autocompletion
-import tailwindPlugin from "./plugins/tailwind-plugin.cjs";
 const { themes } = require("prism-react-renderer");
-const lightTheme = themes.github;
-const darkTheme = themes.dracula;
+
+const baseUrl = process.env.DOCS_BASE_URL || "/playstash-docs/";
+if (!baseUrl.startsWith("/") || !baseUrl.endsWith("/")) {
+  throw new Error("DOCS_BASE_URL must start and end with a slash.");
+}
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: "GameVault",
-  tagline: "Your Games. Your Server. Your Rules.",
-  favicon: "img/logo.png",
-  url: "https://gamevau.lt/",
-  baseUrl: "/",
-  organizationName: "Phalcode",
-  projectName: "gamevault-docs",
+  title: "PlayStash",
+  tagline: "Self-hosted game library documentation",
+  favicon: "img/playstash-logo.png",
+  url: process.env.DOCS_URL || "https://playstash.github.io",
+  baseUrl,
+  organizationName: "PlayStash",
+  projectName: "playstash-docs",
   onBrokenLinks: "throw",
-  markdown: {
-    hooks: {
-      onBrokenMarkdownLinks: "throw",
-    },
-  },
-  i18n: {
-    defaultLocale: "en",
-    locales: ["en"],
-  },
-  plugins: [
-    [
-      "@docusaurus/plugin-client-redirects",
-      {
-        fromExtensions: ["html", "htm"],
-        redirects: [
-          {
-            from: "/gamevault-plus",
-            to: "/docs/gamevault-plus/introduction",
-          },
-          {
-            from: "/license",
-            to: "/docs/license-contribute",
-          },
-        ],
-      },
-    ],
-    require.resolve("@cmfcmf/docusaurus-search-local"),
-    tailwindPlugin,
-    require.resolve("docusaurus-plugin-image-zoom"),
-  ],
+  onBrokenAnchors: "throw",
+  markdown: { hooks: { onBrokenMarkdownLinks: "throw" } },
+  i18n: { defaultLocale: "en", locales: ["en"] },
+  plugins: [[require.resolve("@cmfcmf/docusaurus-search-local"), { indexDocs: true, indexBlog: false, indexPages: false }]],
   presets: [
     [
       "@docusaurus/preset-classic",
-      /** @type {import('@docusaurus/preset-classic').Options} */
-      ({
+      {
         docs: {
-          showLastUpdateAuthor: true,
-          showLastUpdateTime: true,
           sidebarPath: require.resolve("./sidebars.js"),
-          editUrl: "https://github.com/phalcode/gamevault-docs/tree/master",
+          editUrl: "https://github.com/PlayStash/playstash-docs/edit/dev/",
         },
-        blog: {
-          showReadingTime: true,
-          editUrl: "https://github.com/phalcode/gamevault-docs/tree/master",
-          blogSidebarCount: "ALL",
-        },
-        theme: {
-          customCss: require.resolve("./src/css/custom.css"),
-        },
-      }),
+        blog: false,
+        theme: { customCss: require.resolve("./src/css/custom.css") },
+      },
     ],
   ],
-
-  themeConfig:
-    /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
-    ({
-      image: "img/features/library.png",
-      metadata: [
-        {
-          name: "keywords",
-          content: "gaming, self-hosted, drm-free, game library, gamevault, homelab",
-        },
-        { name: "twitter:card", content: "summary_large_image" },
+  themeConfig: {
+    image: "img/playstash-logo.png",
+    metadata: [
+      { name: "keywords", content: "PlayStash, self-hosted, game library, documentation" },
+    ],
+    navbar: {
+      title: "PlayStash",
+      logo: { alt: "PlayStash", src: "img/playstash-logo.png" },
+      items: [
+        { type: "docSidebar", sidebarId: "docs", position: "left", label: "Documentation" },
+        { href: "https://github.com/PlayStash/playstash-docs", label: "GitHub", position: "right" },
       ],
-      navbar: {
-        logo: {
-          alt: "GameVault",
-          src: "img/logo.png",
+    },
+    footer: {
+      style: "dark",
+      links: [
+        {
+          title: "Documentation",
+          items: [
+            { label: "Start here", to: "/docs/intro" },
+            { label: "Set up a server", to: "/docs/server-docs/setup/" },
+            { label: "Download Docker Compose", href: `pathname://${baseUrl}downloads/docker-compose.yml` },
+            { label: "Troubleshooting", to: "/docs/troubleshooting" },
+          ],
         },
-        title: "GameVault",
-        items: [
-          {
-            type: "docSidebar",
-            sidebarId: "docs",
-            position: "left",
-            label: "Documentation",
-          },
-          { to: "/blog", label: "Blog", position: "left" },
-          {
-            label: "GameVault+",
-            to: "/docs/gamevault-plus/introduction",
-            position: "left",
-          },
-          {
-            label: "GitHub",
-            href: "https://github.com/phalcode",
-            position: "right",
-          },
-          {
-            label: "Discord",
-            href: "https://discord.gg/NEdNen2dSu",
-            position: "right",
-          },
-          {
-            label: "Support us",
-            href: "https://gamevau.lt/docs/intro#support",
-            position: "right",
-          },
-        ],
-      },
-      footer: {
-        logo: {
-          src: "img/phalcode_bright.png",
-          srcDark: "img/phalcode_dark.png",
-          height: "30vh",
-          href: "https://phalco.de",
+        {
+          title: "Project",
+          items: [
+            { label: "Repositories", href: "https://github.com/orgs/PlayStash/repositories" },
+            { label: "License and attribution", to: "/docs/license-contribute" },
+            { label: "License text", href: `pathname://${baseUrl}LICENSE` },
+            { label: "Attribution notice", href: `pathname://${baseUrl}NOTICE.txt` },
+          ],
         },
-        links: [
-          {
-            title: "Shortcuts",
-            items: [
-              {
-                label: "Blog",
-                to: "/blog",
-              },
-              {
-                label: "Set Up a Server",
-                to: "/docs/server-docs/setup",
-              },
-              {
-                label: "Troubleshooting",
-                to: "/docs/troubleshooting",
-              },
-            ],
-          },
-          {
-            title: "Development",
-            items: [
-              {
-                label: "Roadmap",
-                href: "https://github.com/orgs/Phalcode/projects/4",
-              },
-              {
-                label: "Repositories",
-                href: "https://github.com/orgs/Phalcode/repositories?q=gamevault",
-              },
-            ],
-          },
-          {
-            title: "Socials",
-            items: [
-              {
-                label: "Reddit",
-                href: "https://reddit.com/r/Phalcode",
-              },
-              {
-                label: "Lemmy",
-                href: "https://lemmy.world/c/phalcode",
-              },
-              {
-                label: "Discord",
-                href: "https://discord.gg/NEdNen2dSu",
-              },
-            ],
-          },
-          {
-            title: "Support us",
-            items: [
-              {
-                label: "Get GameVault+",
-                href: "/docs/gamevault-plus/introduction",
-              },
-              {
-                label: "GitHub Sponsors",
-                href: "https://github.com/sponsors/Phalcode",
-              },
-              {
-                href: "https://ko-fi.com/phalcode",
-                label: "Ko-Fi",
-              },
-              {
-                href: "https://liberapay.com/phalcode",
-                label: "Liberapay",
-              },
-              {
-                href: "https://www.paypal.me/phalcode",
-                label: "PayPal",
-              },
-            ],
-          },
-          {
-            title: "Legals",
-            items: [
-              {
-                label: "License",
-                href: "/docs/license-contribute",
-              },
-              {
-                label: "Legal Notice",
-                href: "https://phalco.de/legal",
-              },
-              {
-                label: "Privacy Policy",
-                href: "https://phalco.de/privacy",
-              },
-              {
-                label: "Terms of Service",
-                href: "https://phalco.de/tos",
-              },
-            ],
-          },
-        ],
-        copyright: `Copyright © ${new Date().getFullYear()} <a href="https://phalco.de">Phalcode</a> - All Rights Reserved.`,
-      },
-      prism: {
-        theme: lightTheme,
-        darkTheme,
-        additionalLanguages: ["bash", "json"],
-      },
-      zoom: {
-        selector: ".zoomable, [data-zoomable]",
-        config: {
-          background: {
-            light: "#e2e1ef",
-            dark: "#171528",
-          },
-        },
-      },
-    }),
+      ],
+      copyright: `PlayStash documentation · ${new Date().getFullYear()}. Original work and licenses are acknowledged in NOTICE and LICENSE.`,
+    },
+    prism: { theme: themes.github, darkTheme: themes.dracula, additionalLanguages: ["bash", "json", "yaml"] },
+  },
 };
 
 module.exports = config;

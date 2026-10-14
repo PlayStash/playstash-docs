@@ -1,95 +1,21 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-/* You can override the default Infima variables here. */
 :root {
-  --ifm-text-light: #f6f5fa;
-  --ifm-text-dark: #06050a;
-  --ifm-font-size-base: 105%;
-  --ifm-color-primary: #413a92;
-  --ifm-color-primary-dark: #3a3483;
-  --ifm-color-primary-darker: #37317c;
-  --ifm-color-primary-darkest: #2d2966;
-  --ifm-color-primary-light: #4740a1;
-  --ifm-color-primary-lighter: #4b43a8;
-  --ifm-color-primary-lightest: #5850b9;
-  --ifm-background-surface-color: #d9d7ea !important;
-  --ifm-navbar-background-color: #e2e1ef !important;
-  --ifm-background-color: #e2e1ef !important;
-  --ifm-footer-background-color: #d9d7ea !important;
-  --ifm-font-color-base: var(--ifm-text-dark);
-  --ifm-font-color-light: #292244;
-  --ifm-font-color-base-inverse: var(--ifm-text-light);
+  --ifm-color-primary: #5146a8;
+  --ifm-color-primary-dark: #493f97;
+  --ifm-color-primary-darker: #453c8f;
+  --ifm-color-primary-darkest: #393175;
+  --ifm-color-primary-light: #5f54b7;
+  --ifm-color-primary-lighter: #685ebc;
+  --ifm-color-primary-lightest: #8178c8;
 }
 
-/* For readability concerns, you should choose a lighter palette in dark mode. */
 [data-theme="dark"] {
-  --ifm-color-primary: #5249b6;
-  --ifm-color-primary-dark: #867fcb;
-  --ifm-color-primary-darker: #7a72c6;
-  --ifm-color-primary-darkest: #554ab6;
-  --ifm-color-primary-light: #b8b3e1;
-  --ifm-color-primary-lighter: #c4c0e6;
-  --ifm-color-primary-lightest: #e9e8f6;
-  --ifm-background-surface-color: #171528 !important;
-  --ifm-navbar-background-color: #11101e !important;
-  --ifm-background-color: #11101e !important;
-  --ifm-footer-background-color: #171528 !important;
-  --ifm-font-color-base: var(--ifm-text-light);
-  --ifm-font-color-light: #b5b4b8;
-  --ifm-font-color-base-inverse: var(--ifm-text-dark);
+  --ifm-color-primary: #aaa0f4;
+  --ifm-color-primary-dark: #8b7eec;
+  --ifm-color-primary-darker: #7b6de8;
+  --ifm-color-primary-darkest: #4e39dd;
+  --ifm-color-primary-light: #c9c2fc;
+  --ifm-color-primary-lighter: #d8d2ff;
+  --ifm-color-primary-lightest: #eeebff;
 }
 
-img[alt="GameVault+ Banner"] {
-  height: 3.75rem;
-}
-
-.dark-background {
-  background-color: var(--ifm-background-surface-color);
-}
-
-button,
-input[type="submit"],
-input[type="reset"] {
-  background: none;
-  color: inherit;
-  border: none;
-  padding: 0;
-  font: inherit;
-  cursor: pointer;
-  outline: inherit;
-}
-
-ul {
-  padding: 0;
-}
-
-main li {
-  margin-left: 1.5em !important;
-}
-
-@keyframes float {
-  0% {
-    transform: translateY(0px) rotate(-12deg) scale(1);
-  }
-  50% {
-    transform: translateY(-15px) rotate(-10deg) scale(1.02);
-  }
-  100% {
-    transform: translateY(0px) rotate(-12deg) scale(1);
-  }
-}
-
-.animate-float {
-  animation: float 8s ease-in-out infinite;
-}
-@media (prefers-reduced-motion: reduce) {
-  .animate-float {
-    animation: none;
-  }
-}
-
-.zoomable {
-  cursor: zoom-in !important;
-}
+.navbar__logo img { border-radius: 0.35rem; }

@@ -1,175 +1,76 @@
 ---
-sidebar_position: 2
+sidebar_position: 2.5
 ---
 
-# File and Folder Structure
+# File and folder structure
 
-If you want to set up a GameVault Server, you need to pay attention to the file and folder structure.
-The volume mapped to the `/files` directory must contain your games. These games must be named correctly and should either be archived in one of the supported archive formats listed below or be a single-file executable as described below to be accurately detected by GameVault.
+The supplied Compose mounts the host's `games/` directory into the backend at `/files`. You can use existing archives, single-file executables, or supported unpacked folders with their related data files. The frontend never mounts your library.
 
-## Supported Archive Formats
+## Supported archive formats
 
-GameVault supports all file formats 7zip 23.01 (2023-06-20) does:
+The backend's default indexer accepts these extensions:
 
 `.7z` `.xz` `.bz2` `.gz` `.tar` `.zip` `.wim` `.ar` `.arj` `.cab` `.chm` `.cpio` `.cramfs` `.dmg` `.ext` `.fat` `.gpt` `.hfs` `.ihex` `.iso` `.lzh` `.lzma` `.mbr` `.msi` `.nsis` `.ntfs` `.qcow2` `.rar` `.rpm` `.squashfs` `.udf` `.uefi` `.vdi` `.vhd` `.vmdk` `.xar` `.z`
 
-:::note Server vs. Client
-The list above is what the **server** detects and indexes. Extraction happens on the **client** after downloading a game, and the two clients do not support the same set of archive formats. See [Client Extraction Support](#client-extraction-support).
-:::
+Override the list with `GAMES_SUPPORTED_FILE_FORMATS` if needed. These are **server indexing** formats. Installation/extraction depends on the client and its available codecs; use ZIP or 7z when preparing broadly compatible packages. The browser interface can download a game, while local installation is performed by a desktop client.
 
-### Client Extraction Support
+## Single-file executables
 
-The **legacy Windows app** bundles the 7-Zip command-line program and can extract every format listed above.
+`.exe`, `.sh` and `.appimage` are supported. The server wraps a single executable in an uncompressed TAR when downloaded so a client receives a consistent package. The server does not execute it. An `.exe` defaults to Windows Setup unless you supply a portable override; `.sh` and `.appimage` default to Linux Portable.
 
-The **cross-platform client** ships a built-in extractor with its own set of codecs. It currently cannot open most of the rarer archive formats; for those, only the legacy Windows app works:
+## Unpacked game folders
 
-| Format               | Legacy Windows app (7-Zip) | Cross-platform client (built-in extractor) |
-| -------------------- | :------------------------: | :----------------------------------------: |
-| `.7z`                |             ✅             |                     ✅                     |
-| `.zip`               |             ✅             |                     ✅                     |
-| `.rar`               |             ✅             |                     ✅                     |
-| `.iso`               |             ✅             |                     ✅                     |
-| `.tar`               |             ✅             |                     ✅                     |
-| `.tar.gz` / `.tgz`   |             ✅             |                     ✅                     |
-| `.tar.bz2` / `.tbz2` |             ✅             |                     ✅                     |
-| `.tar.xz` / `.txz`   |             ✅             |                     ✅                     |
-| `.gz`                |             ✅             |                     ✅                     |
-| `.bz2`               |             ✅             |                     ✅                     |
-| `.xz`                |             ✅             |                     ✅                     |
-| `.wim`               |             ✅             |                     ❌                     |
-| `.ar`                |             ✅             |                     ❌                     |
-| `.arj`               |             ✅             |                     ❌                     |
-| `.cab`               |             ✅             |                     ❌                     |
-| `.chm`               |             ✅             |                     ❌                     |
-| `.cpio`              |             ✅             |                     ❌                     |
-| `.cramfs`            |             ✅             |                     ❌                     |
-| `.dmg`               |             ✅             |                     ❌                     |
-| `.ext`               |             ✅             |                     ❌                     |
-| `.fat`               |             ✅             |                     ❌                     |
-| `.gpt`               |             ✅             |                     ❌                     |
-| `.hfs`               |             ✅             |                     ❌                     |
-| `.ihex`              |             ✅             |                     ❌                     |
-| `.lzh`               |             ✅             |                     ❌                     |
-| `.lzma`              |             ✅             |                     ❌                     |
-| `.mbr`               |             ✅             |                     ❌                     |
-| `.msi`               |             ✅             |                     ❌                     |
-| `.nsis`              |             ✅             |                     ❌                     |
-| `.ntfs`              |             ✅             |                     ❌                     |
-| `.qcow2`             |             ✅             |                     ❌                     |
-| `.rpm`               |             ✅             |                     ❌                     |
-| `.squashfs`          |             ✅             |                     ❌                     |
-| `.udf`               |             ✅             |                     ❌                     |
-| `.uefi`              |             ✅             |                     ❌                     |
-| `.vdi`               |             ✅             |                     ❌                     |
-| `.vhd`               |             ✅             |                     ❌                     |
-| `.vmdk`              |             ✅             |                     ❌                     |
-| `.xar`               |             ✅             |                     ❌                     |
-| `.z`                 |             ✅             |                     ❌                     |
+A folder containing a recognized setup/install executable or a `playstash-package.json` manifest is indexed as one game. Use a manifest for portable folders, explicit titles/versions, installation recipes, launch profiles and sidecars. See [packages, extras and addons](packages.md) for the full format.
 
-Single-file executables (`setup_game.exe`, `.sh`, `.AppImage`) are downloaded as `.tar` and extracted by both clients; there is no difference there.
+```text
+games/
+  Classics/
+    My Game (v1.2) (2024).zip
+  My Other Game (v2.0)/
+    playstash-package.json
+    setup.exe
+    data1.bin
+    Extras/
+      Manual.pdf
+    Addons/
+      Patch.zip
+```
 
-### Single File Executable
+`Extras` and `Addons` are reserved case-insensitive sidecar directories. Their files do not appear as independent games and are excluded from the generated main folder download.
 
-We recommend [archiving games](#supported-archive-formats) to save storage and bandwidth. However, if the game is just a single file executable, like `setup_game.exe` or `setup_game.sh`, you can import it into GameVault without archiving. Just be sure to rename it as described below for compatibility with GameVault (e.g. `Minecraft (v1.12) (2011).exe`). By default, GameVault autodetects the [game type](game-types.md) of single-file executables as a setup-type game. In rare cases, games can be single portable executables without additional setup. If that's the case, make sure to mark the games as "Portable" using the type override.
+## Naming convention
 
-Supported Executables:  
-`.exe` `.sh` `.appimage`
+```text
+Title (vVersion) (EA) (GameType) (NC) (ReleaseYear).zip
+```
 
-:::note Downloading single-file executables
-Single-file executables are packed into a `.tar` file (no compression) and cached in the server's `/tmp` folder on-the-fly when users download them, to make them compatible with the GameVault Client. The cached files are reused until deleted by a Server Restart.
-:::
+Only the title is required. The flags and version prefix are case-sensitive:
 
-## Naming Convention for Games
+| Element | Meaning | Example |
+| --- | --- | --- |
+| Title | Display/search identity, with all parenthesized parts removed | `My Game [Deluxe]` |
+| Version | Optional version beginning with lowercase `v` | `(v1.2.0)` |
+| Early access | Early-access marker | `(EA)` |
+| Game type | Explicit [type](game-types.md) | `(W_S)`, `(W_P)`, `(W_SW)`, `(L_P)`, `(L_SW)` |
+| No cache | Suppress external provider metadata updates | `(NC)` |
+| Release year | Distinguish same-title releases | `(2024)` |
 
-The name of each game file must follow this format:
+A `(NC)` marker on any version path suppresses provider updates for the whole shared game. Parentheses are reserved for these flags; use square brackets for meaningful edition/modpack names. For example, `My Game [Community Modpack] (v1.2) (2024).zip` has a distinct title.
 
-`Title (Version) (EarlyAccess) (GameType) (NoCache) (ReleaseYear).zip`
+Files sharing a title and release-year bucket become downloadable versions of one game. Same-title files without a year share a no-year bucket. See [adding games](adding-games.md) and [indexing](indexing.md) for identity and ordering.
 
-Note that the parentheses must be included, and the naming convention is **case sensitive**.
+Use portable filenames: avoid `/`, `<`, `>`, `:`, double quotes, backslashes, `|`, `?`, `*`, reserved Windows device names, and trailing dots/spaces. For compound archives, use a name whose final extension is supported; a simple ZIP/7z avoids title suffix ambiguity.
 
-Here's an explanation of each part of the naming convention:
+## Additional disks
 
-| Part            | Description                                                                                                                                                                                                              | Example Value(s)                                   | Required? |
-| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------- | --------- |
-| **Title**       | The name of the game                                                                                                                                                                                                     | `Far Cry 6`, `HITMAN 3`                            | Yes       |
-| **Version**     | An optional version tag that must begin with a lowercase `v`                                                                                                                                                             | `(v1.0)`, `(v1.224)` , N/A                         | No        |
-| **EarlyAccess** | An optional tag that indicates whether the game is in Early Access                                                                                                                                                       | `(EA)`, N/A                                        | No        |
-| **GameType**    | Override for the games type. [See here.](game-types.md)                                                                                                                                                                  | `(W_P)`, `(W_S)`, `(W_SW)`, `(L_P)`, `(L_SW)`, N/A | No        |
-| **NoCache**     | An optional "NO CACHE"-flag that prevents metadata searches on external videogame databases. If you have multiple game versions, `(NC)` on any version path disables provider metadata updates for the whole game entry. | `(NC)`, N/A                                        | No        |
-| **ReleaseYear** | The year of the game's release, for accurate detection                                                                                                                                                                   | `(2021)`, `(2019)`, N/A                            | No        |
-
-Here's an example of a file that follows this convention:
-
-`Far Cry 6 (v1.5.0) (2021).zip`
-
-By following this naming convention and using the common values listed in the table above, you can ensure that your games are detected correctly by GameVault.
-
-:::warning Illegal Filenames and Characters
-
-- File names must not contain the following characters: `/`, `<`, `>`, `:`, `"`, `\`, `|`, `?`, and `*`. Replace these problematic characters with appropriate ones to ensure compatibility across all systems.
-- Avoid ending file names with spaces or dots.
-- Avoid using text within Round brackets such as `(GOTY)` in your file names, as GameVault will remove them. Round brackets are reserved for the different flags mentioned above. Use square brackets instead: `[GOTY]`
-- Do not use reserved file names such as `CON`, `PRN`, `AUX`, `NUL`, `COM(1-9)`, `LPT(1-9)`, etc.
-- Avoid using multiple chained extensions like `.tar.gz` or `.tar.bz2`. Instead, use only the last extension like `.gz` or `.bz2`.
-
-:::
-
-### Other Examples
-
-Here are some other valid examples of game names that follow the naming convention:
-
-- `Star Wars Jedi - Fallen Order(v1.0.10.0) (2019).zip`
-- `HITMAN 3 (v3.10.1) (2021).7z`
-- `The Wandering Village (v0.1.32) (EA) (2022).iso`
-- `Saints Row (W_S) (2022).zip`
-- `My personal IndieGame (v1.2.9) (NC) (2018).zip`
-- `Stray (2022).7z`
-- `Captain of Industry (v0.4.12b) (EA) (2022).gz`
-- `Minecraft (2011).exe`
-- `Steam Client (W_SW) (2024).zip`
-- `Lutris (L_SW) (2023).tar.gz`
-
-## Mounting Multiple Game Volumes
-
-Modern games are often large enough to span multiple disks. GameVault still reads them through a single `/files` folder. This section shows how to map multiple drives into that structure.
-
-### Using Docker
-
-If you’re running GameVault in Docker, mounting additional volumes is straightforward. You can add extra volumes to the GameVault server configuration by pointing each mounted drive on the host side to a subfolder under `/files` on the container side. Here's an example:
+Mount additional ordinary directories below `/files` in the **backend** service. Preserve the standard storage mounts:
 
 ```yaml
 services:
-  gamevault-backend:
-    [...]
+  playstash-backend:
     volumes:
-      - /mnt/disk1/games:/files
+      # Add this beside the existing ./games:/files and other mounts.
       - /mnt/disk2/games:/files/disk2
-    [...]
 ```
 
-In this setup:
-
-- `/mnt/disk1/games` is mounted as the main `/files` directory.
-- `/mnt/disk2/games` is mounted as a subfolder `/files/disk2`, allowing GameVault to access games stored on a second disk.
-
-### Running Natively
-
-For systems running GameVault natively without Docker, you can achieve similar results using symbolic links. These links enable the GameVault file watcher to locate games stored across different drives, all accessible within the designated `/files` folder.
-
-To create a symbolic link:
-
-1. Navigate to your configured `/files` directory:
-
-   ```bash
-   cd /files
-   ```
-
-2. Create a symbolic link for each additional drive:
-
-   ```bash
-   ln -s /mnt/disk2/games disk2
-   ```
-
-   This command creates a link named `disk2` within `/files` that points to `/mnt/disk2/games`.
-
-With this setup, GameVault will scan and recognize games stored across multiple drives, maintaining a unified structure under the `/files` folder.
+Leave `GAMES_SEARCH_RECURSIVE=true` to scan those subdirectories. The backend account must have the intended read/write access. Bind mounts are supported; symlinks/junctions inside the game storage are rejected. Do not use the former symlink-based multi-disk workaround.

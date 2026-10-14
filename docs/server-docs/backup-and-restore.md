@@ -2,38 +2,45 @@
 sidebar_position: 7.5
 ---
 
-# Database Backup & Restoration
+# Backup and restore
 
-:::warning Experimental
-GameVault's backup and restore features are experimental and should not be your primary backup solution. Keep independent database backups and use this feature only as a last resort. The workflow is fragile enough that you should avoid relying on it unless you have no better option.
-:::
+Production uses PostgreSQL. Back up both the database and the files it references; a database dump alone does not contain game packages, covers or saves.
 
-:::note Security Measurements  
-For security reasons, every database operation described below requires your database password.  
-:::
+## Complete installation backup
 
-## Backup
+For a consistent filesystem backup, stop the stack from the installation directory:
 
-GameVault can create backups for both supported database systems: Postgres and SQLite. You can trigger and download backups through the GameVault client or through the [API](../advanced-usage/rest-api) for automation. Each backup is a full database snapshot and is stored unencrypted, so handle the files accordingly.
+```sh
+docker compose stop
+```
 
-For SQLite, the GameVault Backup simply duplicates the database file.
+Copy `docker-compose.yml`, any local `.env`, **all of `data/`**, and `games/` to your backup location while the services are stopped. Preserve file ownership and permissions. In particular, keep `data/postgres/`, `data/secrets/postgres-password` and `data/config/auth-seed` together. Then resume the same containers:
 
-For Postgres, it uses `pg_dump` to create a database dump.
+```sh
+docker compose start
+```
 
-:::tip Automating via the API
-The backup endpoints are `GET /api/admin/database/backup` and `POST /api/admin/database/restore` (multipart upload). Both require the `X-Database-Password` header with your database password.
-:::
+A copy of a running PostgreSQL data directory is not a consistent cold backup. Keep an independent backup on other storage and verify your restore procedure. For a complete cold restore, stop the destination stack, restore the matching files/directories with their permissions into the installation directory, and start with the compatible pinned images. Do not replace a running database directory.
 
-## Restoration
+## Database dump in the client
 
-Restoring a backup is simple, but risky.
+An administrator can open **Administration → Backup & Restore Database → Backup**, enter the **Database Password**, and select **Start Backup**. In the supplied Compose this is the generated private value stored in `data/secrets/postgres-password`; it is not the user's login password.
 
-You can upload a backup and start the restore from the GameVault client or through the [API](../advanced-usage/rest-api). Before you proceed, keep these points in mind:
+The downloaded dump is unencrypted and can contain private library/user data. Store it privately. Preserve a separate copy of media, saves, configuration, secrets and game files for the same point in time.
 
-1. Avoid restoring a backup on a different server version. If you must do it, downgrade the GameVault server to the version that created the backup if possible. Higher versions are more likely to hit compatibility issues. Before you continue, create another backup of the current data.
+## Restore a database dump
 
-2. Never restore a backup from a different database technology such as SQLite to Postgres or the other way around. It will fail.
+Open **Administration → Backup & Restore Database → Restore**, choose **Backup File**, provide the current **Database Password**, and select **Start Restore**. This replaces the current database contents. Make a fresh backup before restoring and use a dump from the same database technology and a compatible PlayStash/PostgreSQL version.
 
-3. Watch the server logs during the restore. If you see anything beyond a harmless warning, copy the file at `/tmp/gamevault-pre-restore.db` from the container or server. GameVault creates it immediately before restoring the uploaded backup. In a major failure, GameVault may try to restore this pre-restore backup automatically. If recovery still fails, you will need to restore manually or use another backup.
+The PostgreSQL 16 deployment uses version-16 `pg_dump`/`pg_restore` tools. The backend creates a private pre-restore dump before modifying the database. If the uploaded dump cannot be restored, it reports an error and attempts to restore the original data. If that recovery also fails, the pre-restore snapshot remains under `data/db/playstash-restore-*/` for manual recovery; check the server logs. Do not assume an error response means the upload was successfully applied.
 
-4. Restoration is not incremental. It deletes the existing data set and replaces it with the uploaded backup.
+## API
+
+Both endpoints require authenticated Admin access **and** `X-Database-Password` with the current database password:
+
+- `GET /api/admin/database/backup`: create/download a database dump.
+- `POST /api/admin/database/restore`: multipart upload using field `file`.
+
+Use HTTPS for remote administration. API descriptions are available at `/api/docs`. Fresh production installation is PostgreSQL; this guide does not convert an old upstream database.
+
+Chat history lives only in backend memory and disappears on restart. It is not included in a database or filesystem backup. See [chat retention](websockets.md).

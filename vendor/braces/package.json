@@ -1,0 +1,12 @@
+{
+  "name": "@playstash/braces",
+  "version": "3.0.3-playstash.1",
+  "description": "Local braces 3.0.3 security backport with bounded AST nesting",
+  "private": true,
+  "main": "index.js",
+  "license": "MIT",
+  "author": "Jon Schlinkert (https://github.com/jonschlinkert)",
+  "files": ["index.js", "lib", "LICENSE", "SECURITY.md", "PROVENANCE.json"],
+  "dependencies": { "fill-range": "7.1.1" },
+  "engines": { "node": ">=8" }
+}

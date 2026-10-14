@@ -1,154 +1,154 @@
 ---
+title: How to use
 sidebar_position: 2
 ---
 
-# How to Use
+## Browse your library
+
+Open `Library`, search for a game and use its filters or sorting controls. The
+cross-platform interface supports local categories made from tag and folder
+filters; administrators can also define shared automatic folder-tag rules.
+Server permissions and age/access restrictions still determine which games you
+can see. Local installed-game browsing requires a desktop client.
+
+Open a game to read its description, requirements, screenshots, reviews and
+progress. Set your own progress state on the game page. Package extras and saves
+are described below. These features use the current PlayStash backend API; a
+provider's credentials are configured [on the server](../server-docs/metadata-enrichment/metadata.md).
 
 ## File & Folder Structure
 
-All downloaded and installed game files are stored inside a root folder that you choose in the client settings (Downloads → Download locations).
+The Tauri desktop client uses the roots selected under
+`Settings → Downloads → Download locations`. A fresh download uses:
 
-### Cross-Platform Client
+```text
+<Root>/PlayStash/<Title>/Versions/<Version>/Download/
+<Root>/PlayStash/<Title>/Versions/<Version>/Extraction/
+<Root>/PlayStash/<Title>/Versions/<Version>/Installation/
+```
 
-The modern client organizes each game and version separately:
+Titles and version labels are sanitized for local filenames. A version without a
+label uses `Unspecified`; a conflicting label may include the version ID. Keep
+the generated configuration files so PlayStash can recognize existing downloads.
 
-- `<Root>/GameVault/<Title>/Versions/<Version>/Download/`: the downloaded archive
-- `<Root>/GameVault/<Title>/Versions/<Version>/Extraction/`: the extracted files
-- `<Root>/GameVault/<Title>/Versions/<Version>/Installation/`: the installed game
+The WPF application uses a different layout:
 
-### Legacy Windows App
+```text
+<Root>/PlayStash/Downloads/(<GameID>)<Title>/
+<Root>/PlayStash/Downloads/(<GameID>)<Title>/Extract/
+<Root>/PlayStash/Installations/(<GameID>)<Title>/
+```
 
-The legacy Windows client uses a flatter layout:
+These layouts are not interchangeable. Adding a Tauri root does not automatically
+convert a WPF installation or the other client's preferences. Browser downloads
+follow your browser's chosen destination.
 
-- `D:/GameVault/Downloads/`: where your downloads are saved. For each downloaded game, GameVault generates a new folder in this directory.
-- `D:/GameVault/Installations/`: where your installed games belong. For each downloaded game, GameVault generates a new folder in this directory.
+## Downloading games
 
-:::note Example
-Let's say you installed GameVault freshly and configured your Root folder path to `D:/` because your D Drive is larger.
-:::
+In the Tauri desktop client, use a game's download control and select a configured
+location if needed. Monitor downloads in `Downloads`, where the current workflow
+provides pause/resume, cancellation, extraction and installation actions.
 
-## Downloading Games
+In the browser, the game's download menu offers `Direct Download`. The browser
+saves the file; it does not perform native extraction or installation. A
+`Download via PlayStash Client` link requires a locally installed application that
+handles `playstash://`; it does not install that application for you.
 
-Let's say you found the game `Assassin's Creed Unity (Game ID: 74)` in the Library tab and chose to download it.
+The WPF application's `Downloads` view manages its own queue and local paths. Its
+current workflow downloads the server-selected game version; it does not offer
+the Tauri version picker.
 
-:::warning
-Only download games from servers you fully trust! There's a potential risk of malware. If your antivirus alerts during the following process, abort any download and installation of the game, fully delete the downloaded data, and warn your server admins to address the malware promptly.
-:::
+## Selecting a game version
 
-GameVault uses the game's name (and, in the cross-platform client, its version) to identify the folders:
+When the Tauri/browser workflow finds multiple versions, it displays a version
+selector before downloading. Choose the version you want. Distinct Tauri versions
+use separate installation folders; a newer server version does not silently
+replace an installed version.
 
-- **Cross-platform client:** `<Root>/GameVault/Assassin's Creed Unity/Versions/<Version>/Download/` (plus `Extraction/` and `Installation/`)
-- **Legacy Windows app:** `<Root>/GameVault/Downloads/(74) Assassin's Creed Unity/` and `<Root>/GameVault/Installations/(74) Assassin's Creed Unity/`
+## Extracting the game
 
-Your downloaded game archive is saved in the download folder. The installation folder should be empty until you install the game.
+For archived downloads, select `Extract` when the download is complete. Encrypted
+archives need their archive password. Shared per-game archive passwords can come
+from server metadata; local extraction defaults are separate client preferences.
+Use the archive's own password rather than your PlayStash account password.
 
-## Selecting a Game Version
+Automatic extraction is optional in each desktop client's installation settings.
+If extraction fails, retain the original archive so you can retry and inspect the
+reported error. Browser sessions need a local archive utility instead.
 
-If a game has [multiple versions](../server-docs/adding-games.md#keeping-multiple-versions-of-the-same-game) on the server, you can choose which one to download. Open the game's details page or click the download button on its card and pick the desired version from the version list. The server ranks the versions and marks the highest-ranked one as the default; the version list shows each entry, so you can always download another version later.
+## Installing portable games
 
-:::note Legacy client
-The legacy Windows client always downloads the server-selected latest version and does not offer a version picker.
-:::
+For portable games, select `Install` to put the extracted files into the game's
+installation directory. Choose the game's launch executable in its local
+`Launch Options` if the default is missing or incorrect. The client tracks the
+selected local executable; a portable package may still need its own system
+libraries or compatibility tools.
 
-To start playing a game you've downloaded, follow these steps to install it. This process makes it easier for you.
+## Installing setup games
 
-Game installation has two main parts:
+Select the installer from the installation dropdown, then choose `Install`.
+Follow the game's setup process and use the installation destination displayed
+by PlayStash. The Tauri Linux workflow displays a Windows-style destination when
+launching a Windows installer through its compatibility tools.
 
-### 1. Extracting the Game
+An executable or setup action is an explicit local choice. A server-provided
+package recipe is not executed just by browsing or downloading a package.
+The server's game-type detection can be overridden by the administrator; if it
+selects the wrong type, correct that classification or the local installation mode
+instead of assuming every executable is an installer.
 
-GameVault games are [always served in some kind of archive format](../server-docs/structure.md). So you will need to extract them.
+## Launching games
 
-After the download is complete, locate the `Extract` button. Clicking it will extract the game into a subfolder called `Extracted` within the game's Download Directory. A progress bar shows the extraction progress and estimated remaining time. Larger or extremely compressed games may take longer to extract.
+After installation, use the play control or select an available launch profile.
+Local `Game Settings → Launch Options` controls the executable and parameters.
+Shared launch profiles are named executable/parameter pairs configured for the
+library, but they still execute only on a compatible desktop when selected.
 
-If there are extraction errors, you can retry the extraction unless you deleted the game archive. Error details are displayed in the user interface. If you encounter repeated extraction errors for the same game, try to extract the game manually or contact your GameVault server administrators to check the integrity of those files.
+Keep the desktop client running if you want its process-based playtime tracking.
+A browser cannot observe local game processes. On Linux, Windows games can use
+Wine/Proton through the Tauri client's compatibility settings; native game and
+compatibility-tool support still depend on the game's requirements. The WPF
+application can configure a local emulator and ROM under `Emulator / ROM`; it
+does not supply emulators or ROMs.
 
-### 2. Installing the Game
+## Packages, extras and addons
 
-There are different types of GameVault games. [You can find more information about them here](../server-docs/game-types.md).
+In the cross-platform game page, open `Package & extras`:
 
-For now, we will focus on the general concept of Portable and Setup Games.
+- Download individual extras, such as manuals or additional files.
+- Explicitly choose `Use recipe for next download` to use a provided package
+  installer recipe in the desktop workflow.
+- Select optional addons and adjust their installation order. The desktop asks
+  before applying addons because they can overwrite installed files.
+- Select a named launch profile when you want to use it.
 
-Portable games are ready to play out of the box, while Setup games require additional setup before playing.
+The WPF application exposes package extras and addon actions in game details using
+its own controls. Do not assume identical labels or layouts across clients.
 
-:::note What determines the game type?
-The server automatically tries to determine the game's type based on the content, but errors can occur. Administrators can manually overwrite the detected game type by including a [type override in the file name](../server-docs/structure.md).
-:::
+An addon failure stops the remaining sequence; files from already completed
+addons remain applied. Keep a backup before replacing files you want to retain.
+For package structure, see [Adding games](../server-docs/adding-games.md).
 
-#### Installing Portable Games
+## Local post-install scripts
 
-For portable games, GameVault provides a very simple installation process. You don't need to select an executable file. Just press the `Install` button. GameVault will automatically move all the extracted game content to your game's installation directory. This should happen instantly.
+The Tauri desktop setting `Settings → Downloads → Post-install script` accepts a
+local absolute script or executable path and a JSON array of arguments. `%F` is
+replaced with the installation directory as one literal argument. Executables,
+`.sh` and `.ps1` files are supported where their interpreters are available.
 
-Once the installation is complete, your game is ready to be played.
+The path is empty by default. After you explicitly enable this setting, it runs
+once after a successful installation with your own account permissions. It is
+not a server command and does not ask for fresh consent on every installation.
+Disable it by clearing the configured path. An error is reported separately even
+if the game installation itself completed.
 
-:::note No Game Executable
-If you don't see a game executable here but instead see a setup executable, the game's type has incorrectly been set to a portable type on the server. Contact your server administrators to manually override that game's type to a setup type. Then, manually move the files inside your game's installation folder back into the game's download folder. Run the installer and manually select the now-empty game's installation folder as its destination.
-:::
+## Saves, integrations and metadata
 
-#### Installing Setup Games
+Use the game's `Saves` tab in the browser/Tauri interface for ZIP save versions.
+Native restore asks for the actual save folder and confirms overwriting. The
+WPF application has its own optional automatic save integration and a separate
+`Manage Cloud Save Versions` view. See [Integrations and save versions](./integrations.md).
 
-For games that require installation, GameVault will provide a dropdown menu to launch a setup executable file. Select the appropriate setup executable and press the `Install` button.
-
-:::note No Setup Executable
-If you don't see a setup executable here but instead see the game's executable, it may have incorrectly been set to a setup type on the server. Contact your server administrators to manually override that game's type to a portable type. Then, manually move the files inside the game's download `Extracted/` folder to the game's corresponding installation folder, and you should be ready to play.
-:::
-
-GameVault tries to automate setup installers as much as possible. It estimates the best installer parameters to run setups silently/invisibly and preconfigure the target installation directory. This works very well for many installers. For installers that cannot be fully automated, you may still need to confirm or manually set the installation path.
-
-If you need to manually set the installation path, **it is crucial to set the destination folder for your game files to your game's Installation folder** (e.g., `<GameVault Root>/GameVault/Installations/(74) Assassin's Creed Unity/`). This is where the final game files and executable should be located. If you don't set the destination, GameVault will have no idea where to look for your game files, and the game won't be playable via GameVault. If you set it incorrectly, uninstall the game from your system and retry this step.
-
-Once the installation is complete, your game is ready to be played.
-
-:::info How automated are setup installations in GameVault?
-GameVault can automate a large part of many setup installations by estimating installer arguments and target paths. This includes silent/invisible installs where supported. But because installer technologies differ, full automation is still not possible for every case. When an installer cannot be fully automated, you still need to manually select the installation path and click through the installer.
-:::
-
-#### Clearing Remains
-
-Once you have fully confirmed that a game works, you are free to delete the game's corresponding Download using the trash icon in the downloads tab.
-
-## Playing a Game
-
-Launching a game on GameVault is simple. Once your game is installed and ready to go, it will appear in the "Installed Games" section. If GameVault didn't correctly predict the correct executable to launch automatically, you can change it in the game's settings and click the `Play` button to start the game.
-
-## Tracking Your Game Progress
-
-Once GameVault is launched, it automatically activates playtime tracking. Both desktop clients continuously monitor your playtime and send this information to the server whenever a game executable (except those on the ignore list) is running from your game installation folders. Even if you play without an internet connection, your playtime is still tracked and synced to the server as soon as you regain connectivity.
-
-In our context, the term "Progress" refers to a user's activity of playing a game. Each user can have a single progress entry per game.
-
-The progress entry includes the completion state, which can be modified through the community tab, as well as the tracked playtime and some other additional information.
-
-You have the ability to change the progress state or delete it using the community tab. Certain states also change automatically, such as transitioning from UNPLAYED to PLAYING when the game is launched.
-
-:::warning
-Progress tracking does not include savegames. While GameVault [supports savegame synchronization and storage](../gamevault-plus/cloud-saves.md), this functionality is exclusive to the [GameVault+](../gamevault-plus/introduction.md) premium subscription and operates independently from progress tracking.
-:::
-
-## Modifying Games
-
-If you are unhappy with the Box Art or Background Image of a game on your server or if there are incorrect Metadata associated with a game, there is a straightforward solution.
-
-If you have the `EDITOR` role or higher on your GameVault server, you can modify games by following these steps:
-
-Open the game settings by clicking on the settings icon, either in the top-right corner of the box art image or on the game's detail page. A popup will appear.
-
-- Under **Edit Images**, you can select/paste/drop an image or paste a URL for different box art or background image.
-- Under **Metadata**, you can remap/unmap incorrectly associated metadata for each provider.
-- Under **Custom Metadata**, you can manually overwrite the Metadata of the game.
-
-Please note that any changes made will affect all users on the server.
-
-## Modifying Users
-
-If you want to change the data, profile picture, or background image of your User:
-
-Click your User Icon on the top left corner, then locate and click on the Settings Icon in the top right corner, and a popup will appear.
-
-- Under **Edit Images**, you can select/paste/drop an image or paste a URL for different avatar or background image.
-- Under **Edit Details**, you can change the data of your user.
-
-If you have the `ADMIN` role or higher on your GameVault server, you can do the same for all other user profiles in the Admin Dashboard.
-
-## Exiting or Relaunching the App
-
-In order to maintain playtime tracking functionality, simply closing the launcher using the X-Button does not terminate the GameVault process. Instead, it minimizes the app to the system Tray. Therefore, if you truly wish to exit the application, be sure to right-click and select "Exit" from the context menu. The same principle applies when restarting the app. Only one GameVault window can be active at a time, so initiating another GameVault merely brings the minimized app to the forefront without actually restarting it.
+For a wrong title match, missing description or custom cover, use the game's
+shared metadata controls. Provider setup remains a backend setting; see
+[Metadata, covers and game descriptions](../server-docs/metadata-enrichment/metadata.md).

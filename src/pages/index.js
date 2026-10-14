@@ -1,42 +1,7 @@
-import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
-import Layout from "@theme/Layout";
 import React from "react";
-import * as Swetrix from "swetrix";
-import { DemoSection } from "../components/DemoSection";
-import { Faqs } from "../components/Faqs";
-import { PrimaryFeatures } from "../components/Features";
-import { Hero } from "../components/Hero";
+import { Redirect } from "@docusaurus/router";
+import useBaseUrl from "@docusaurus/useBaseUrl";
 
 export default function Home() {
-  Swetrix.init("K6k7j6GHClhh");
-  Swetrix.trackViews();
-  const { siteConfig } = useDocusaurusContext();
-  return (
-    <Layout
-      title="The Ultimate Self-Hosted Gaming Platform"
-      description="Host your own DRM-free game library, track your stats, and share the experience with friends. It's like having your own personal Steam, but you're the one in control."
-    >
-      <a href="#main-content" className="sr-only focus:not-sr-only">Skip to main content</a>
-      <noscript>
-        <img
-          src="https://api.swetrix.com/log/noscript?pid=K6k7j6GHClhh"
-          alt=""
-        />
-      </noscript>
-        <main id="main-content">
-        <section className="bg-background-dark">
-          <Hero />
-        </section>
-        <PrimaryFeatures />
-        <DemoSection />
-        <Faqs />
-        <div className="bg-background-dark py-6">
-          <p className="text-center text-xs text-text-light opacity-50">
-            * In case you're wondering, all depicted games on this website are
-            placeholders and not real
-          </p>
-        </div>
-      </main>
-    </Layout>
-  );
+  return <Redirect to={useBaseUrl("/docs/intro")} />;
 }

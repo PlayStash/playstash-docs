@@ -1,39 +1,18 @@
-# Early Access Program
+---
+sidebar_position: 2
+---
 
-## Welcome
+# Stable and development channels
 
-Welcome to the GameVault Early Access Program! This exclusive opportunity allows you to be among the first to experience upcoming GameVault updates before they are released to the public. As a member of this special group, you'll have the chance to explore new features ahead of time. However, please keep in mind that these early releases may not be as stable as our regular versions. Your active participation and feedback are crucial in helping us refine and improve everything before the official release for everyone.
+PlayStash maintains main and dev only. There is no separate early-access branch
+or paid access program.
 
-### Participation Requirements
+Main is stable source; dev produces development artifacts and tags. Published
+release versions are immutable. Changed release packages require a new version;
+same-version pushes can still produce Actions build artifacts.
 
-To join the Early Access Program, please make sure to meet the following requirements:
+Server stable images use latest/frontend/postgres16. Development uses
+dev/frontend-dev/postgres16-dev. Keep a compatible set rather than mixing channels.
 
-- Actively participate in the designated Discord channel and follow the pinned messages.
-- Have GameVault installed from the Microsoft Store and be logged in with your Microsoft Account. If you haven't installed it yet, you can get it [here](https://www.microsoft.com/store/apps/9PCKDV76GL75).
-- If required in the current phase: Run a GameVault Server with the **phalcode/gamevault-backend:early-access** image. (Only use this image if all users on your server are participating in the Early Access Program and have been accepted as testers, as it may cause issues!)
-
-### How to Join
-
-To become part of the program, follow these simple steps:
-
-1. Fill out the [Application Form](https://forms.gle/RQvEGfWeUFPBCUaG6).
-2. Wait for the early access phase to begin. Details will be shared in the exclusive Discord channel.
-
-### Important Information
-
-- The Early Access Program has limited slots, with priority given to Supporters and Trusted Members.
-- If you are accepted and later found not meeting the requirements, you may be removed from future testing, allowing the next applicant on our list to take your place.
-
-## FAQ for Early Access Testers
-
-### How to switch to an early access version?
-
-Wait for the early access phase to start, Unlock Developer Tools in the Settings (tap the version number 5×) and pick the **Early Access** update channel. See [Update Channels](../client-docs/updating-client.md#update-channels).
-
-### How to return to a stable version?
-
-In Settings -> About -> Update channel and pick **Stable** update channel. For more information, see [Update Channels](../client-docs/updating-client.md#update-channels).
-
-### Where to report bugs and suggest/discuss changes?
-
-- Head over to the Discord #early-access channel once you're accepted into the group. This is where you can report bugs, as well as suggest and discuss changes.
+Private desktop release feeds are unavailable to the anonymous updater.
+Use signed-in GitHub downloads. See [client updates](../client-docs/updating-client.md).

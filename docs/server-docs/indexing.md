@@ -4,21 +4,21 @@ sidebar_position: 7
 
 # Game Indexing
 
-GameVault keeps your database in sync with your game files.
+PlayStash keeps your database in sync with your game files.
 
-It watches your files volume (default: `/files`) and updates the index when files are added, changed, or removed. Each detected file is stored as its own game version record, while the parent game entry stays stable. You can also trigger a full reindex manually via API.
+It watches your files volume (default: `/files`) and updates the index when files are added, changed, or removed. Each detected game archive, single-file executable or supported package folder is stored as its own game version record, while the parent game entry stays stable. You can also trigger a full reindex manually via API.
 
 ## When Indexing Runs
 
 Indexing happens in these situations:
 
 - **Automatic file watcher**: reacts to file changes in your library.
-- **Scheduled interval scan**: optional fallback (`GAMES_INDEX_INTERVAL_IN_MINUTES`) if you want periodic checks.
+- **Scheduled interval scan**: periodic fallback (`GAMES_INDEX_INTERVAL_IN_MINUTES`, default 60 minutes).
 - **Manual trigger**: run a full reindex through the API.
 
 ## What Happens During Indexing
 
-For each detected game file, GameVault does the following:
+For each detected game file, PlayStash does the following:
 
 1. Validates the file name and extension.
 2. Tries to match the file to an existing game.
@@ -28,7 +28,7 @@ For each detected game file, GameVault does the following:
 
 ### Matching Logic (Simplified)
 
-GameVault tries these match steps in order:
+PlayStash tries these match steps in order:
 
 1. **Exact file path match** → update existing version record.
 2. **Soft-deleted match** (path or title/year match) → restore game and update version.
@@ -38,21 +38,15 @@ GameVault tries these match steps in order:
 
 ## How the Default Version Is Chosen
 
-When a game has multiple versions, GameVault ranks them and uses the highest-ranked one as the default download.
+When a game has multiple versions, PlayStash ranks them and uses the highest-ranked one as the default download.
 
-The ranking prefers, in this order:
+Comparable semantic versions are ranked newest first. Other dotted numeric versions receive a higher comparison score than date-like or less structured numeric labels. For comparable non-semantic labels, the server compares extracted dates/numbers, then prefers stable-looking labels when otherwise equal, then newer `indexed_at` timestamps and a lexical tie-breaker.
 
-- strict semantic versions such as `v2.0.0` over `v1.5.0`
-- other comparable numeric versions over plain text labels
-- newer date-like versions such as `v2025-04-27`
-- stable-looking labels over pre-release-like labels such as `alpha`, `beta`, or `rc` when the rest is otherwise equal
-- newer `indexed_at` timestamps as a tie-breaker
-
-This same ordering is also used when GameVault returns `versions[]` in API responses, so the first entry is normally the server-selected default version.
+The API returns sorted `versions[]`. When a collection has no comparable version tags, the existing preferred file path can remain the default to keep an unversioned library stable; do not infer its chosen default only from import time.
 
 ## Integrity Check
 
-After indexing, GameVault verifies that indexed files still exist on disk.
+After indexing, PlayStash verifies that indexed files still exist on disk.
 
 - Missing version files are removed from the active version list.
 - If the previously selected default version disappeared, another remaining version is promoted automatically.
@@ -80,3 +74,9 @@ GAMES_SEARCH_EXCLUDE_DIR_REGEX=^(screenshots|trailers|ost)$
 # Example: skip files ending with .soundtrack.zip
 GAMES_SEARCH_EXCLUDE_FILE_REGEX=\.soundtrack\.zip$
 ```
+
+## Client controls and metadata
+
+Use **Administration → Actions → Reindex Games** or administrator `PUT /api/games/reindex` for a full file scan. This is distinct from **Server diagnostics → Refresh all metadata**, which refreshes provider data without rebuilding the file index. See [metadata enrichment](metadata-enrichment/metadata.md).
+
+Folder-tag rules are applied during indexing; [the rule editor](folder-tags.md) can also refresh existing games immediately. Reserved `Extras`/`Addons` sidecars are not indexed as games. Nested links are rejected, and unpacked payloads are validated before/after generating a download archive. On network shares, enable `GAMES_INDEX_USE_POLLING` if native events do not arrive.

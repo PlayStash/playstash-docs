@@ -1,0 +1,15 @@
+PlayStash Documentation
+
+Derived from documentation by Alkan Alper, Schäfer Philip GbR / Phalcode and contributors.
+Original source: https://github.com/Phalcode/gamevault-docs
+Imported source commit: c3cbde9bd5af111efb02e1cf4994b966ed19ba22
+
+PlayStash changes update product branding, deployment, configuration, clients,
+metadata sources, privacy guidance and build workflows.
+The original LICENSE is preserved unchanged: CC BY-NC-SA 4.0.
+https://creativecommons.org/licenses/by-nc-sa/4.0/
+
+Third-party build component: vendor/braces is derived from braces 3.0.3 by
+Jon Schlinkert, distributed under its original MIT license in vendor/braces/LICENSE.
+It includes a local security backport; PROVENANCE.json records the original
+source and SECURITY.md describes the changes. It is not an upstream release.

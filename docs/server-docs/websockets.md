@@ -2,44 +2,76 @@
 sidebar_position: 9
 ---
 
-# WebSockets
+# WebSockets, activity and chat
 
-:::warning Work in progress
+Connect a Socket.IO v4 client to the server's default namespace at `/socket.io`.
+Authenticate every message with `X-Api-Key` in the handshake headers. Browser
+clients can use the Socket.IO handshake auth object `{ "api_key": "..." }`, since
+browser WebSockets cannot set custom headers. Do not put API keys in query URLs.
+`SERVER_ONLINE_ACTIVITIES_DISABLED=true` disables the entire activity/chat gateway.
 
-GameVault's WebSocket support is still in an early state. It is implemented on the server, but **no client uses it yet**. If you're interested in how we're doing with implementing WebSockets, you can check out [this page on GitHub](https://github.com/Phalcode/gamevault-app/issues/205) to see our progress.
+The gateway sends no library data on an unauthenticated connection. After
+connecting, send `get-activities`; the reply event `activities` contains the
+current visible users. Send `set-activity` with `{ "state": "ONLINE" }`, `BUSY`,
+`INVISIBLE`, or `PLAYING` plus `game_id`. `activity` updates contain the trusted
+`user_id`, `socket_id`, `state`, and optional `game_id`. `remove-activity` contains
+`{ "user_id": 123 }` when someone disconnects or becomes invisible. An invisible
+user sees their own state but is absent from other users' lists. Restricted game
+names and IDs are hidden unless both the viewer has access and the player opted
+into sharing restricted activity.
 
-:::
+## Chat events
 
-GameVault Backend 9.0.0 introduced WebSockets. The implementation uses [Socket.io](https://socket.io/), which in turn relies on the WebSocket protocol.
+- Send `chat-history` with `{ "room": "lobby", "limit": 50 }` or
+  `{ "room": "game:123" }`. It returns `chat-history` with
+  `{ "conversation": "lobby", "messages": [...] }` and subscribes that socket
+  to future `chat-message` events in that room.
+- Send `chat-history` with `{ "recipient_user_id": 123 }` to read a direct
+  conversation. Its opaque conversation ID is `dm:<smaller ID>:<larger ID>`.
+- Send `chat-send` with `{ "room": "lobby", "text": "Hello",
+"client_message_id": "a UUID v4" }`, or substitute `recipient_user_id` for
+  `room`. Omitting both selects the lobby. The reply is `chat-sent` with the
+  accepted message. New messages also arrive as `chat-message` for subscribed
+  room members or the two direct-message participants.
+- Send `chat-leave` with the room/recipient target to unsubscribe that socket.
+  The reply is `chat-left` with its conversation ID.
 
-WebSockets enable real-time communication between the server and clients. Clients can send data to the server, and the server can also push updates on its own.
+Replies use the named response events; clients should listen for them and use
+timeouts with the same client UUID when retrying a send. Message objects contain
+`id`, optional `client_message_id`, `user_id`, `username`, `text`, `created_at`,
+and either `room` or `recipient_user_id`. Clients must render `text` as plain
+text. Only the server assigns sender IDs, names and timestamps.
 
-The WebSocket server runs on the same HTTP(S) port as the REST API (`SERVER_PORT`, or `SERVER_HTTPS_PORT` when HTTPS is enabled) using the default Socket.IO path `/socket.io`. No separate port or additional configuration is required. If you use a reverse proxy, make sure WebSocket upgrade requests are forwarded.
+The server rechecks activation, game permissions and parental age restrictions
+for room history, sending and delivery. Direct messages are available only to
+their two participants. At most five new messages per user are accepted in ten
+seconds; text is limited to 2,000 characters. Reusing the same client UUID and
+text in a retained conversation acknowledges the existing message without a
+second broadcast; different text with that UUID is rejected.
 
-## Activities
+History lasts at most 24 hours, with at most 100 messages in each of 100 active
+conversations. Older conversations may be evicted earlier under load. History
+is held in process memory and disappears on restart. Clients must not promise
+persistent delivery or chat backups. A socket can subscribe to at most 100
+conversations. Offline direct recipients can read retained messages after
+reconnecting, but there is no external push notification service.
 
-Starting with GameVault Backend 9.0.0, clients can share their current activity with the server. Examples include:
+The machine-readable event contract is [activity.asyncapi.json](https://github.com/PlayStash/playstash-backend/blob/main/docs/activity.asyncapi.json).
+Refresh it after updating the DTOs:
 
-- User 1 is online.
-- User 2 is offline.
-- User 3 is playing Mindustry.
-- User 4 is marked as busy.
+```sh
+pnpm build
+node scripts/export-openapi.mjs .local/playstash.openapi.json
+node scripts/export-activity-contract.mjs .local/playstash.openapi.json
+```
 
-Once a client reports an activity, the server forwards it to other users. If a client does not report activity, the server shows that user as offline.
+After a production build, `node scripts/check-chat-runtime.mjs` verifies the
+emitted DTO metadata with Nest's real validation pipeline, named chat replies,
+message delivery, UUID retries and activity updates. The repository workflow
+runs this check before publishing.
 
-### Events
+## Client use and proxying
 
-| Direction      | Event            | Payload                          |
-| -------------- | ---------------- | -------------------------------- |
-| Client to Server | `set-activity`  | The activity to broadcast        |
-| Client to Server | `get-activities` | Request all current activities   |
-| Server to Client | `activity`      | A single user's updated activity |
-| Server to Client | `activities`    | All users' current activities    |
+The web frontend and cross-platform desktop client expose Chat with lobby, game rooms and direct messages. Presence is published while the Chat page is connected. The Invisible option hides your presence from other users. Chat is already implemented; it does not require a subscription.
 
-### Disabling Activities
-
-If you want to disable activities, set `SERVER_ONLINE_ACTIVITIES_DISABLED` to `true`. This causes all users to appear offline.
-
-## Security
-
-Each user is assigned a randomly generated API-Key, which they can retrieve at `/api/users/me`. This API key must be included in the `X-Api-Key` header of every Socket.IO handshake request to the server.
+The standard Compose frontend proxies `/socket.io/` to the backend on the same public port. An outer proxy must allow WebSocket upgrades without changing the path. See [reverse proxy setup](setup/reverse-proxy.md).

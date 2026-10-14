@@ -1,48 +1,22 @@
 ---
 sidebar_position: 1
-id: toc
 ---
 
-# Setting up a GameVault Server
+# Choose a server setup
 
-There are multiple ways to set up a GameVault Server. You can choose one from below that suits you.
+The supported production installation is [one Docker Compose stack](docker-compose.md) with separate frontend, API and PostgreSQL containers. GitHub builds the AMD64 and ARM64 images. The server downloads them and starts the services; it does not build source code.
 
-If you have any trouble setting up a GameVault server don't give up! There are a lot of helpful people on our [discord](https://discord.gg/NEdNen2dSu) that can help you.
+1. Install Docker Engine and its Compose plugin on your Linux host or Linux virtual machine.
+2. Download [docker-compose.yml](/downloads/docker-compose.yml) into its own installation directory.
+3. Run `docker compose up -d` there.
+4. Open `http://SERVER-IP:8080` and register your first administrator account.
 
-## Supported Methods
+The public port belongs to the frontend. The backend and PostgreSQL remain on the private Compose network. Complete the first registration before exposing the installation to other users. No subscription, registry account or mandatory `.env` file is needed.
 
-- [Docker Compose](./docker-compose.md)
-- [Caprover](./caprover.md)
-- [TrueNAS Scale (prior v24.10)](./truenas-scale-legacy.md)
-- [TrueNAS Scale (since v24.10)](./truenas-scale.md)
-- [UNRAID](./unraid.md)
-- [Synology Container Manager](./synology-container-manager.md)
-- [Native](./native.md)
+See the [Compose guide](docker-compose.md) for storage, updates, backups and public image tags, and [reverse proxy guide](reverse-proxy.md) for HTTPS.
 
-### More Methods
+## NAS and managed platforms
 
-We want to add more setup options to our lineup! Each system has its own way of doing things, and it can take some time and experience to set up new options just right.
+Use the same Compose file on [Synology](synology-container-manager.md), [Unraid](unraid.md) or [TrueNAS](truenas-scale.md) when your platform supports a complete Compose project. If it does not, run the stack in a Linux VM. A single-container vendor template cannot represent this deployment.
 
-We're looking for people who are excited to help out. Since we don't run a GameVault Server on every system, we need your help to add new setup options! If you're interested in joining and setting up options for any system, we'd love to have you contribute to this documentation [on Github](https://github.com/Phalcode/gamevault-docs). Together, we can make our platform easier for everyone to use.
-
-## What Next?
-
-**Congratulations! 🥳**
-
-You now should have a server up and running. To further set up and start using server, you can follow these steps:
-
-:::tip Built-in Web UI
-Once your server is running, you can use it right away in your browser at `http://<server-ip>:8080`. The Web UI is served by the server itself and can be disabled with `WEB_UI_ENABLED`. For a desktop experience, install one of the [GameVault clients](../../client-docs/setup.md).
-:::
-
-1. **Configure your server:** Customize the server settings to meet your specific needs. Refer to the [configuration guide](../configuration.md) for detailed instructions.
-
-2. **Add some games:** Prepare your game files in the required format for GameVault to identify and install them correctly. Read the [structure chapter](../structure.md) for important information. Once ready, proceed to [add your games](../adding-games.md).
-
-3. **Create your first user:** Set up an admin user account to gain full administrative access to the application. Refer to the [user management guide](../user-management.md) for instructions on setting up the first user.
-
-4. **Enhance your games with metadata:** Connect your server to a metadata source such as IGDB to enrich your games with metadata. Learn how to do this in the [metadata chapter](../metadata-enrichment/metadata.md).
-
-5. **(OPTIONAL) Make your server accessible outside your Local Area Network**: If you want to make the application accessible beyond your local network, for instance, for your friends or yourself to connect to it remotely, you'll need to configure an HTTPS reverse proxy and potentially make adjustments to firewall rules. We recommend utilizing [NGINX Proxy Manager](https://nginxproxymanager.com) for this purpose. Numerous guides are available on how to set up a reverse proxy for a Docker container, so we won't cover it in detail in this guide.
-
-Enjoy your new gaming experience with GameVault!
+[Native development](native.md) is available to contributors. It is not required for installing the server.

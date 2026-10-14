@@ -2,102 +2,40 @@
 sidebar_position: 1
 ---
 
-# Introduction
+# PlayStash documentation
 
-## What is GameVault?
+PlayStash is a self-hosted library for organizing, downloading and playing your
+DRM-free games. Your server stores games, metadata, users and saves. Browser and
+desktop clients connect to that server.
 
-GameVault is a selfhostable [source-available](https://wikipedia.org/wiki/Source-available_software) gaming platform for DRM-free videogames. It gives you and your community a Steam-like way to browse and play the game files stored on your file server.
+Checked against Backend **17.1.4**, Web/Desktop Frontend **17.2.3** and Windows
+application **1.18.1** on **14 October 2026**. All library features are available
+without a subscription. Roles, activation, age restrictions and game access apply.
 
-Add your game files such as installers and portable builds to a folder. The server detects them, enriches them with metadata, and exposes them through a client where users can organize, download, install, and launch games. It also tracks playtime and progress.
+## Start here
 
-GameVault consists of two components:
+1. [Install the server](server-docs/setup/setup.md): one Compose, separate frontend,
+   API and PostgreSQL, public prebuilt images.
+2. [Create the first administrator](server-docs/user-management.md) and
+   [add games](server-docs/adding-games.md).
+3. [Enable Steam or IGDB](server-docs/metadata-enrichment/metadata.md) for metadata.
+4. [Connect a client](client-docs/setup.md).
+5. Configure [backups](server-docs/backup-and-restore.md) and read
+   [privacy and external services](privacy.md).
 
-- A self-hosted backend server served with Docker
-- A client application to use this server. You can pick from: 
-    - the **Web UI** you can open directly in your browser
-    - the **cross-platform desktop client** (Windows, Linux, macOS, **early access**)
-    - the **legacy Windows app**
+## Repositories
 
-:::tip Try it out!
-If you don't have a server yet, but want to try it out, you can use our demo server to get a feel for how it is:
-  
-**URL**: https://demo.gamevau.lt  
-**Username**: demo  
-**Password**: demodemo
-:::
+| Repository | Purpose |
+| --- | --- |
+| [playstash-backend](https://github.com/PlayStash/playstash-backend) | API, database, providers and server images |
+| [playstash-frontend](https://github.com/PlayStash/playstash-frontend) | Web interface and Windows/Linux/macOS desktop |
+| [playstash-app](https://github.com/PlayStash/playstash-app) | Separate Windows application |
+| [playstash-docs](https://github.com/PlayStash/playstash-docs) | This documentation |
+| [playstash-playnite-integration](https://github.com/PlayStash/playstash-playnite-integration) | Playnite extension |
+| [playstash-community-themes](https://github.com/PlayStash/playstash-community-themes) | Windows application themes |
+| [playstash-backend-example-plugins](https://github.com/PlayStash/playstash-backend-example-plugins) | Backend plugin examples |
 
-## Features
-
-### Client Features
-
-- 🔎 [Browse your server's game collection](./client-docs/gui#library)
-- 📥 [Download games from your server](./client-docs/how-to-use#downloading-games)
-- ⚙️ [Automatic game extraction and installation](./client-docs/how-to-use#1-extracting-the-game)
-- 🎮 [Launch and play games on your Computer](./client-docs/how-to-use#playing-a-game)
-- ⏱️ [Track playtime and progress (works offline)](./client-docs/how-to-use#tracking-your-game-progress)
-- 👥 [Compare game progress with other users](./client-docs/gui#community)
-- ✏️ [Edit game metadata](./client-docs/gui#metadata)
-- 🔒 [Manage users and games through Admin UI](./client-docs/gui#administration)
-- 🎥 [Built-in media player for trailers and gameplay videos](./client-docs/gui#game)
-- 🎨 [Themes](./client-docs/themes.md)
-
-### Server Features
-
-- 🔄 [Automatic game indexing from file system](./server-docs/indexing.md)
-- 🤖 [Intelligent game type detection](./server-docs/game-types.md)
-- 📚 [Automatic metadata enrichment from various video game databases](./server-docs/metadata-enrichment/metadata.md)
-- 👥 [Multi-user authentication system](./server-docs/user-management.md)
-- 🔒 [Role-based access control](./server-docs/user-management#user-roles)
-- 👨‍👩‍👧‍👦 [Parental control features](./server-docs/parental-control)
-- ⏱️ [Game progress tracking system](./client-docs/how-to-use#tracking-your-game-progress)
-- 🚨 [Built-in health monitoring and logging](./advanced-usage/rest-api)
-- 🔎 [Advanced search, filtering, and sorting](./advanced-usage/rest-api)
-- 🔌 [API documentation](./advanced-usage/rest-api)
-- ⚙️ [Highly configurable server settings](./server-docs/configuration)
-- 🔌 [Extensible plugin framework](./server-docs/plugins.md)
-- 🔄 [WebSocket support for real-time updates](./server-docs/websockets.md)
-- 💾 [Database backup and restoration](./server-docs/backup-and-restore.md)
-- 🔐 [OAuth2 authentication support](./advanced-usage/authentication#setting-up-oauth2-authentication-single-sign-on)
-
-### Premium Features
-
-- Visit our [GameVault+](./gamevault-plus/introduction.md) page to learn more about our premium features.
-
-## Support Us
-
-We build GameVault in our free time. If you want to support continued development, [get GameVault+](./gamevault-plus/introduction.md).
-
-Alternatively you can support us by donating us some spare dollars on any of these platforms:
-
-- [Ko-Fi](https://ko-fi.com/phalcode)
-- [Liberapay](https://liberapay.com/Phalcode)
-- [GitHub Sponsors](https://github.com/sponsors/Phalcode)
-- [PayPal](https://paypal.me/phalcode)
-
-:::tip Tip for donators
-If you connect your [Discord](https://discord.gg/NEdNen2dSu) account to Ko-Fi, you'll automatically receive the "@Supporters" role in our [Discord](https://discord.gg/NEdNen2dSu). If you donate through another platform and want the role, send us your receipt as proof.
-:::
-
-## License
-
-[![CC BY-NC-SA 4.0][cc-by-nc-sa-shield]][cc-by-nc-sa]  
-[![CC BY-NC-SA 4.0][cc-by-nc-sa-image]][cc-by-nc-sa]
-
-This work is licensed under a
-[Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License][cc-by-nc-sa].
-
-GameVault is not open-source software. [Click here to learn why.](/blog/2023/07/13)
-
-[cc-by-nc-sa]: http://creativecommons.org/licenses/by-nc-sa/4.0/
-[cc-by-nc-sa-image]: https://licensebuttons.net/l/by-nc-sa/4.0/88x31.png
-[cc-by-nc-sa-shield]: https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg
-
-## Legal Disclaimer
-
-:::warning Legal Disclaimer
-GameVault manages DRM-free games. We are not responsible for the content or files users store or share.
-
-When we say DRM-free games, we only mean games obtained legally. While GameVault _can_ theoretically be used with illegally obtained games, we do not endorse or support piracy.
-
-Users must be aware of and comply with copyright laws in their respective jurisdictions. We encourage responsible and legal use of GameVault. Unlawful use is strictly improper and unauthorized.
-:::
+Source repositories and releases remain private. Public container visibility
+allows anonymous image downloads independently of source visibility. GitHub
+sign-in with repository access is required for private documentation and installers.
+Only main and dev are maintained. See [maintenance](advanced-usage/development.md).

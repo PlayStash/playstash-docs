@@ -2,72 +2,50 @@
 sidebar_position: 6
 ---
 
-# User Management
+# Users, signup and administrator access
 
-This documentation provides instructions on user management for the GameVault server. User management involves configuring the initial admin user, enabling/disabling user registration, managing user activation, and assigning roles. These features are crucial for controlling user access, maintaining security, and administering the server effectively.
+## First login
 
-## Admin User
+After `docker compose up -d`, open the frontend at `http://SERVER-IP:8080` or your configured HTTPS hostname. Choose registration and create your own username/password. With the supplied fresh-install Compose, **the first successfully registered account becomes an active administrator**. There is no predefined login and the server does not create an account for you.
 
-### Initial Setup
+Finish that first registration before giving other people access to the instance. Subsequent Basic registrations receive the User role and require administrator activation by default. If you deliberately configure `SERVER_ADMIN_USERNAME`, that reserved name changes bootstrap behavior: its registration requires the matching `SERVER_ADMIN_PASSWORD` and cannot be claimed by another person.
 
-:::warning
-GameVault does not register the first admin account for you. You will need to do that yourself.
-:::
+## Manage accounts
 
-The first registered user on a server is automatically activated and granted admin permissions. You can register it using the GameVault Client Application.
+Open **Administration** to activate/deactivate users and edit their roles. Administrators can create, edit, delete and recover accounts. Deactivation applies to **every role, including Admin**: it blocks sign-in, issued tokens, API keys/download tokens and live activity/chat access. A configured recovery administrator is reactivated on backend startup.
 
-## Admin Role Recovery
+| Role | Level | Main permissions |
+| --- | --- | --- |
+| Guest | 0 | View permitted library content. |
+| User | 1 | Download permitted games, keep progress/bookmarks and edit their own profile. |
+| Editor | 2 | Edit and remap game metadata. |
+| Admin | 3 | Manage users, game uploads/deletion, server settings, diagnostics and backups. |
 
-If you lost your admin permissions due to misconfiguration, you can fix this by using the `SERVER_ADMIN_USERNAME` environment variable. Simply set this variable to the username of the user you wish to elevate to the admin role. Upon server startup, GameVault will automatically grant admin permissions to the specified username and activate the account. Note that this variable only promotes an **existing** user; it never creates a new account.
+All accounts still obey activation. Age and selected-user restrictions apply to non-admin library access. Features require no paid subscription.
 
-## Admin Password Recovery
+## Disable public signup
 
-In the event that the server owner gets locked out of the admin user account due to password loss or other reasons, the GameVault Server provides an easy way to recover access.
+Create the first administrator **before** disabling self-registration. Add this under the existing backend environment block:
 
-First, set the `SERVER_ADMIN_USERNAME` environment variable to the username of the admin user you wish to reset the password for.
-Then, set the `SERVER_ADMIN_PASSWORD` environment variable to the desired password for the admin user.
-
-:::tip
-Both variables are only applied at server startup, and the user must already exist on the server. They are a **recovery mechanism**, not an account creation mechanism.
-:::
-
-For example:
-
-```ini
-SERVER_ADMIN_USERNAME=gamevaultfan1
-SERVER_ADMIN_PASSWORD=hunter2
+```yaml
+services:
+  playstash-backend:
+    environment:
+      SERVER_REGISTRATION_DISABLED: "true"
 ```
 
-Upon the next startup of the GameVault server, the admin user's password will be updated to the specified password, allowing the user to regain access.
+Keep the other Compose entries, then run `docker compose up -d`. This blocks Basic public self-registration; authenticated administrators retain account creation. It does not disable existing logins. OAuth2/SSO account provisioning is separate, so review identity-provider access if SSO is enabled.
 
-## User Registration
+Leave `SERVER_ACCOUNT_ACTIVATION_DISABLED=false` for manual activation of subsequent users. Set it to `true` only if you want new accounts activated automatically.
 
-You have the option to enable or disable new user registration. When tighter control is needed, you can opt to disable public registration.
+## Administrator recovery
 
-Simply set the `SERVER_REGISTRATION_DISABLED` environment variable to `true` to easily deactivate the public user registration API in GameVault. This prevents new users from creating accounts and accessing the application.
+For an **existing** account, temporarily add `SERVER_ADMIN_USERNAME` to promote/reactivate it on startup. Add `SERVER_ADMIN_PASSWORD` as well to reset that account's password. Use a newly chosen password rather than a documented example; `_FILE` can supply it from a private mounted secret. Recreate the backend with `docker compose up -d`, then remove the recovery password and recreate again after regaining access.
 
-However, even when public registration is closed, authenticated administrators retain the ability to register new users.
+Neither setting creates a new account. While a configured recovery administrator remains selected, startup continues to promote and activate that account. Protect server configuration and its secrets accordingly.
 
-## User Activation
+## SSO and authentication storage
 
-The activation process is a crucial step to authorize and activate new user accounts. By default, newly registered users are required to be activated by an administrator before they can fully utilize the application.
+OAuth2 requires your own authorization/token/UserInfo endpoints, client ID/secret and public callback URL. See [authentication configuration](configuration.md#authentication). Identity is bound to the trusted provider's immutable subject. A same-name/email local account is not automatically linked to an SSO identity.
 
-Unactivated users have limited rights, even less than the rights of a guest role user. They are treated as unauthenticated and can not access most APIs.
-Admins are exempt from activation checks. They can activate new users through the admin panel within the GameVault application.
-
-However, if you wish to bypass the mandatory activation step and allow new users to immediately gain full access to GameVault, you can disable the activation process. Simply set the `SERVER_ACCOUNT_ACTIVATION_DISABLED` environment variable to `true`. This activates users automatically upon registration, removes the activation requirement and grants immediate access to new users.
-
-## User Roles
-
-Roles play a crucial role in ensuring the security and proper functioning of the GameVault server. They determine the permissions and access levels granted to users within the application.
-
-GameVault implements the following roles:
-
-| Role            | Description                                                                                                        | Level |
-| --------------- | ------------------------------------------------------------------------------------------------------------------ | ----- |
-| Guest           | This role allows users to view most content within the application.                                                | 0     |
-| Users (Default) | This role includes permissions such as downloading games, creating progresses, and editing the user's own profile. | 1     |
-| Editors         | Editors have the ability to edit and remap games within the application.                                           | 2     |
-| Admins          | Admins possess full control over user management and can edit user profiles.                                       | 3     |
-
-By assigning appropriate roles to users, you can ensure that they have the necessary access and privileges based on their responsibilities.
+The Compose setup persists a separate random authentication key in `data/config/auth-seed`; preserve it with your database backups. Explicit `AUTH_SEED`/`AUTH_SEED_FILE` takes precedence and requires at least 32 bytes of independent randomness. Replacing a signing key invalidates existing tokens. Use [the trusted HTTPS proxy configuration](setup/reverse-proxy.md) for production access.

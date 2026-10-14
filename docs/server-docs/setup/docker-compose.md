@@ -1,145 +1,161 @@
 ---
-title: "Using Docker Compose"
 sidebar_position: 2
 ---
 
-[Docker](https://www.docker.com) is a platform for developing, shipping, and running applications in containers, and [Docker Compose](https://docs.docker.com/compose) is a tool for defining and managing multi-container Docker applications.
+# Docker Compose installation
 
-In this guide, you will learn how to set up GameVault using Docker and Docker Compose.
+Download [docker-compose.yml](/downloads/docker-compose.yml) to an empty directory on a Linux server with Docker
+Engine and the Docker Compose plugin, change into that directory, and run:
 
-## Prerequisites
-
-- [Docker Engine](https://docs.docker.com/engine/install/) is installed on your system. ([Docker Desktop](https://docs.docker.com/get-docker/) should work too, but this guide is tailored for Docker Engine. Steps might look different on Desktop, but the gist is the same.)
-
-## Step 1: Creating a Docker Compose file
-
-Create a new file named `docker-compose.yml` in a directory of your choice and copy the following code:
-
-```yaml
-services:
-  gamevault-backend:
-    image: phalcode/gamevault-backend:latest
-    restart: unless-stopped
-    environment:
-      DB_HOST: db
-      DB_USERNAME: gamevault
-      DB_PASSWORD: YOURPASSWORDHERE
-    volumes:
-      # Mount the folder where your games are
-      - /your/games/folder:/files
-      # Mount the folder where GameVault should store its media
-      - /your/media/folder:/media
-    ports:
-      - 8080:8080/tcp
-  db:
-    image: postgres:18
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: gamevault
-      POSTGRES_PASSWORD: YOURPASSWORDHERE
-      POSTGRES_DB: gamevault
-    volumes:
-      # Mount the folder where your PostgreSQL database files should land
-      - /your/database/folder:/var/lib/postgresql
-```
-
-:::note
-Replace the variables (`YOURPASSWORDHERE`, `etc.`), as well as the folder paths with what suits you, of course. You can change the port on the left side of the colon aswell.
-:::
-
-:::warning
-Password (YOURPASSWORDHERE) can't be empty! else the database will not work. If you don't want a password, consider running without a PostgreSQL Database (Not recommended)
-:::
-
-:::note
-GameVault works with any recent PostgreSQL version (16 and above). This guide uses `postgres:18`, which is the recommended version.
-:::
-
-### Tips for Running Docker on Windows
-
-The above `docker-compose.yaml` file might not work as expected with Docker for Windows. Here are some things to consider to make it compatible:
-
-- **Use Forward Slashes in Paths**: In your volumes, replace Windows-style backslashes (`\`) with forward slashes (`/`).
-
-  ```yaml
-  volumes:
-    # Path to your games folder
-    - C:/Your/Games/Folder:/files
-  ```
-
-- **PostgreSQL Database Volume**: For PostgreSQL, it’s often better to use a Docker volume instead of mounting a folder, due to compatibility issues of PostgreSQL with Windows Filesystems. To do this, leave out any volume definition in the database section of your YAML file. [Read more here](https://github.com/docker-library/postgres/issues/116).
-
-### Alternative Step 1: Running without a PostgreSQL Database
-
-We don't recommend it, but you can run GameVault without a PostgreSQL Database too using the following configuration:
-
-```yaml
-services:
-  gamevault-backend:
-    image: phalcode/gamevault-backend:latest
-    restart: unless-stopped
-    environment:
-      DB_SYSTEM: "SQLITE"
-    volumes:
-      - /your/games/folder:/files
-      - /your/media/folder:/media
-      - /your/sqlite/database/folder:/db
-    ports:
-      - 8080:8080/tcp
-```
-
-:::note
-Replace the variables (`YOURPASSWORDHERE`, `etc.`), as well as the folder paths with what suits you, of course. You can change the port on the left side of the colon aswell.
-:::
-
-## Step 2: Start the Service
-
-Open a terminal, navigate to the directory where the `docker-compose.yml` file is located, and run the following command:
-
-```bash
+```sh
 docker compose up -d
 ```
 
-This will start the GameVault server and PostgreSQL server in the background. The `-d` parameter detaches the process from the terminal.
+GitHub builds separate frontend, backend and PostgreSQL images for AMD64 and
+ARM64. Compose downloads and starts all three, prepares persistent directories
+and generates the private database password and authentication key. The server
+needs no source checkout, compiler, registry login or environment file.
 
-## Conclusion
+Open `http://SERVER-IP:8080` and register your account. The first account becomes
+an active administrator; later accounts require administrator activation. Complete
+this first registration before giving other people access to the instance.
 
-Congratulations! Your GameVault Server has been successfully set up using Docker and Docker Compose. You can now access it using your server's IP address followed by the designated port, such as `http://192.168.0.15:8080` for example. That address also serves the built-in Web UI, which you can open directly in your browser, or you can connect with one of the [GameVault clients](../../client-docs/setup.md).
+To obtain game descriptions and covers, enable Steam or configure IGDB in the
+backend environment. Steam needs no API key. See [Metadata, covers and game
+descriptions](../metadata-enrichment/metadata.md) for the configuration, refreshing existing games,
+correcting matches and setting your own images.
 
-[Click here to continue.](setup.md#what-next)
+## Services and network
 
-## Additional Info
+| Service              | Responsibility                                   | Reachability                            |
+| -------------------- | ------------------------------------------------ | --------------------------------------- |
+| `playstash-frontend` | Web interface, static files and proxy to the API | Host port 8080                          |
+| `playstash-backend`  | API, authentication, games and WebSockets        | Compose network only, port 8080         |
+| `db`                 | PostgreSQL 16 database                           | Compose network only, port 5432         |
+| `playstash-init`     | Generate the database password once              | Exits successfully after initialization |
 
-### Stopping the server
+The frontend and backend run in distinct containers from distinct images. The
+backend contains no frontend ZIP or web application and returns 404 at `/`.
+The frontend contains static files and Nginx, with no backend runtime, database
+password or user-data mounts. It runs as UID/GID 101 with a read-only filesystem
+and a temporary `/tmp` mount. The initializer uses the backend image only to
+create the private password file; it is not a fourth permanent server.
 
-Open a terminal, navigate to the directory where the `docker-compose.yml` file is located, and run the following command:
+The frontend forwards `/api/` and `/socket.io/` to the backend and serves the SPA
+for browser routes. Browser requests use the same public address. Authentication,
+WebSocket upgrades, streaming uploads and ranged downloads pass through this
+proxy. PostgreSQL and the backend need no externally published ports.
 
-```bash
-docker compose down
+All three image families live in the existing public GHCR package
+`ghcr.io/playstash/playstash-backend`, with distinct tags:
+
+| Image                   | Stable       | Development      | Pinned release example |
+| ----------------------- | ------------ | ---------------- | ---------------------- |
+| Backend and initializer | `latest`     | `dev`            | `v17.1.4`              |
+| Frontend                | `frontend`   | `frontend-dev`   | `frontend-v17.1.4`     |
+| PostgreSQL              | `postgres16` | `postgres16-dev` | `postgres16-v17.1.4`   |
+
+The frontend runtime definition and web build come from a pinned release of the
+separate frontend repository. Its source commit, checksums and licenses are
+verified before building and preserved in `/opt/playstash/frontend/` in the
+frontend image. A frontend repository push does not alter an already published
+server release. GitHub tests the complete deployment and scans all three runtime
+images on both architectures before publishing a stable server release. Source
+repositories remain private; public image visibility allows anonymous downloads.
+
+## Reverse proxy
+
+Point your HTTPS reverse proxy at `http://SERVER-IP:8080`, the frontend service.
+Use a dedicated hostname with `/` as its root. Forward all paths, enable WebSocket
+upgrades and allow the desired upload size (game archives can be large). The
+frontend routes API and WebSocket traffic internally, so one public proxy target
+covers the whole installation.
+
+If the outer proxy terminates HTTPS, it must set `Host`, `X-Forwarded-Proto` and
+`X-Forwarded-For` correctly. Set `PLAYSTASH_TRUSTED_PROXY_CIDRS` to the explicit
+IP or CIDR of the outer proxy as seen by the frontend container, for example:
+
+```sh
+PLAYSTASH_TRUSTED_PROXY_CIDRS=192.168.1.10/32 docker compose up -d
 ```
 
-### Reading the logs
+For a proxy running on the Docker host, the observed peer can be a Docker bridge
+gateway rather than its public address; use that specific address. Keep the same
+setting on subsequent starts, or put it in a local `.env` file. Leave it empty for
+direct HTTP access. Only explicitly trusted peers can supply the client IP and
+HTTPS protocol. Restrict access to port 8080 to the proxy when exposing a public
+instance; do not trust `0.0.0.0/0` or `::/0`.
 
-Open a terminal and run the following command:
+Use `PLAYSTASH_PORT=8090 docker compose up -d` if host port 8080 is already used.
+To disable Basic self-registration after creating your administrator, add
+`SERVER_REGISTRATION_DISABLED: "true"` under `playstash-backend.environment` and
+run `docker compose up -d` again. SSO account provisioning is configured separately.
 
-```bash
-docker logs gamevault-backend
+## Data and games
+
+All persistent data lives beside the Compose file:
+
+| Directory         | Contents                                     |
+| ----------------- | -------------------------------------------- |
+| `games/`          | Game archives and ordinary game folders      |
+| `data/config/`    | Configuration and private authentication key |
+| `data/postgres/`  | PostgreSQL database                          |
+| `data/db/`        | Database backups                             |
+| `data/secrets/`   | Automatically generated PostgreSQL password  |
+| `data/media/`     | Covers, screenshots and other media          |
+| `data/savefiles/` | Uploaded game saves                          |
+| `data/plugins/`   | Backend plugins                              |
+| `data/logs/`      | Backend logs                                 |
+
+Upload games through the clients or place them in `games/` using the backend's
+service account (UID/GID 1000 by default). Startup prepares these directories
+and their permissions. For another owner use
+`PUID=1001 PGID=1001 docker compose up -d` and keep those IDs on later starts.
+Mounted data must use ordinary directories and files rather than filesystem
+links. Frontend replacement does not change these directories.
+
+For a consistent backup, run `docker compose stop`, back up `data/` and `games/`,
+then run `docker compose start`. Preserve `data/config/auth-seed`,
+`data/secrets/postgres-password` and `data/postgres/` together. PostgreSQL 16
+backups use matching version 16 tools. A failed restore reports an error and
+recovers the original database; if recovery itself fails, its private snapshot
+remains in `data/db/playstash-restore-*/` for manual recovery. The password is
+randomly generated once and never logged. Later starts reuse both private keys;
+invalid or unsafe key files stop startup. Explicit `AUTH_SEED`, `AUTH_SEED_FILE`
+or the corresponding YAML setting takes precedence over automatic persistence.
+
+These Compose files use PostgreSQL for a fresh installation. They do not convert
+an existing database. `docker-compose.postgres.yml` is an identical named
+alternative to `docker-compose.yml`.
+
+## Status, updates and stopping
+
+```sh
+docker compose ps
+docker compose logs --tail=100
 ```
 
-### Updating the Server
+`playstash-init` finishes with status 0. PostgreSQL becomes healthy before the
+backend starts, and the frontend starts after the API is healthy. The database,
+backend and frontend each have health checks. The initial startup can take a
+short time while the empty database is prepared.
 
-To update the GameVault server to the latest version, follow these steps:
+The standard Compose file follows stable releases and checks for updates on each
+start. Apply an available update from the same directory with:
 
-Open a terminal and pull the latest images for GameVault:
-
-```bash
-docker compose pull
+```sh
+docker compose up -d
 ```
 
-Restart the containers with the updated images:
+`docker compose down` removes containers and the network, retaining host data.
+Start again with `docker compose up -d`. Keep the same installation directory and
+do not delete `data/` or `games/`. To pin a release, change all image tags according
+to the table above, including the initializer. Backend and frontend can be
+recreated independently without invalidating existing users or authentication
+keys. API documentation is available at `/api/docs`.
 
-```bash
-docker compose up -d --force-recreate
-```
+## Configure metadata and other features
 
-Your server should now be running the latest version of GameVault!
+Provider settings belong to `playstash-backend.environment`. See [metadata enrichment](../metadata-enrichment/metadata.md) for Steam and IGDB, [configuration](../configuration.md) for the complete settings, and [user management](../user-management.md) for registration and roles. Add settings under the existing backend environment block, then run `docker compose up -d`. A variable in a local `.env` reaches a container only if Compose explicitly references or passes it.
+
+The release bundle currently pairs backend 17.1.4 with frontend 17.2.3. The `frontend-v17.1.4` tag identifies the complete server release, rather than the frontend application version.

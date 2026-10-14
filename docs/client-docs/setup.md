@@ -1,202 +1,130 @@
 ---
+title: Setting up a PlayStash client
 sidebar_position: 1
 ---
 
-# Setting up a GameVault Client
-
-Follow this guide to install GameVault on your computer and connect it to a server.
+Choose a browser session, the cross-platform desktop client, or the separate
+Windows application. These are different clients with different local features.
+This guide covers frontend 17.2.3 and Windows application 1.18.1.
 
 ## Installation
 
-GameVault is available as two desktop clients:
+| Client | Where it runs | Distribution |
+| --- | --- | --- |
+| Web interface | Your browser | Served by the separate frontend container |
+| Cross-platform desktop client, built with Tauri | Windows x64, Linux x64, macOS ARM64 and Intel | `playstash-frontend` Releases |
+| Windows application, built with WPF | Windows 11 or newer, x64 | `playstash-app` Releases |
 
-- **GameVault (legacy Windows app)**: the original Windows client, distributed through the Microsoft Store. It is still supported.
-- **GameVault Desktop (cross-platform) (early access)**: the modern client, available for **Windows, Linux, and macOS** soon.
+The source repositories and release assets are private. Sign in to GitHub with an
+account that has access before opening their release pages. Public Docker images
+allow anonymous server installation; they do not make desktop installers public.
 
-The Web UI itself can also be used directly in your browser; see [Web UI](#web-ui).
+### Cross-platform client
 
-### GameVault Desktop (Cross-Platform)
+Download a package from [PlayStash frontend Releases](https://github.com/PlayStash/playstash-frontend/releases):
 
-:::warning Early Access
-The cross-platform client is still in **early access**. It is available for **Windows, Linux, and macOS**, but you may run into bugs and missing features. If you need the most reliable experience, use the [legacy Windows app](#legacy-windows-app) for now.
-:::
+- Windows: the x64 `-setup.exe` installer.
+- Linux: the x64 `.deb` package or `.AppImage`. Make an AppImage executable before
+  launching it; Linux runtime requirements depend on the distribution.
+- macOS: the `.dmg` for your Mac's ARM64 or Intel architecture.
 
-:::note Platform support
-We mainly test the cross-platform client on **Linux and Windows**. macOS builds are provided, but less thoroughly tested, so you may run into more issues on the Mac.
-:::
-
-Download the installer for your platform from the [GitHub releases page](https://github.com/Phalcode/gamevault-frontend/releases):
-
-- **Windows**: the `*-setup.exe` (NSIS) installer
-- **Linux**: the `.deb` package or the `.AppImage`
-- **macOS**: the `.dmg`
-
-The cross-platform client keeps itself up to date through a built-in updater; see [Updating the Client](updating-client.md#cross-platform-client).
+Install the package, then launch PlayStash. The client uses the same interface as
+the browser, with native downloads, extraction, installation and launch features.
+A desktop package does not make a game compatible with every operating system.
+See [Updating the client](./updating-client.md) for the current manual update process.
 
 ### Web UI
 
-If you don't want to install anything, open the Web UI directly in your browser at your server's address (e.g. `http://192.168.0.15:8080`). The Web UI is served by the server itself and offers the same interface as the cross-platform client. Keep in mind that a browser-only session cannot launch or install games on your computer: the full download manager is only available in the desktop clients.
-
-### Legacy Windows App
-
-#### Recommended Installation Option
-
-**Requirement:** Windows 10/11 operating system with Microsoft Store installed
-
-To begin, install the GameVault application from [the official Microsoft Store](https://www.microsoft.com/store/apps/9PCKDV76GL75).
-
-Experienced users can also simply run this command in PowerShell:
-
-```ps
-winget install gamevault
-```
-
-After installation, continue with [Initial Configuration](#initial-configuration).
-
-#### Alternative Installation Options
-
-If you do not want to use the Microsoft Store, or you are on another platform, use one of the alternatives below.
-
-:::warning
-Please note that every option outside the Microsoft Store is less supported and should be treated as a fallback. You will also need to [manage updates manually](updating-client.md#other-sources).
-:::
-
-##### Option 1: Obtain Pre-Built Artifacts from GitHub
-
-Access the latest pre-built artifact [here](https://github.com/Phalcode/gamevault-app/releases/latest).
-
-:::note Antivirus/Smartscreen Warning
-Your antivirus software or Windows Smartscreen may attempt to prevent you from running our pre-built application because it is a suspicious-looking binary compiled by an unfamiliar source. This is due to the lack of a code signing certificate for budget reasons. You can safely disregard this warning and proceed to run the app by selecting `More Details` and then choosing `Run Anyway`.
-:::
-
-##### Option 2: Linux Installation
-
-To run GameVault on Linux using Wine, [follow this community-driven method](../advanced-usage/linux-client.md).
-
-:::tip Native Linux client
-If you are on Linux, you no longer need Wine: the [cross-platform client](#gamevault-desktop-cross-platform) ships native `.deb` and `.AppImage` packages.
-:::
-
-##### Option 3: Self-Compiling on Windows
-
-1. Install Visual Studio IDE (2022 recommended).
-2. Install the ".NET Desktop Development" workload and ensure that .NET 8.0 is installed.
-3. Clone the `gamevault-app` source code.
-4. Open Visual Studio and choose the `.sln` file.
-5. Select `Release` from the dropdown menu.
-6. Build > Build gamevault.
-7. Use the output files.
-
-##### Option 4: Extracting from the .appxbundle
-
-1. Go to [https://store.rg-adguard.net](https://store.rg-adguard.net).
-2. Paste `https://www.microsoft.com/store/apps/9PCKDV76GL75` into the search box.
-3. Download the current `.appxbundle`.
-4. Extract the `.appxbundle`, followed by the `ReleasePackage_[VERSION]_x64.appx` file.
-
-## Initial Configuration
-
-The configuration below applies to both the cross-platform client and the legacy Windows app.
-
-Once you have installed and launched GameVault, the first thing you will see is the login window.
-
-![profiles](/img/docs/setup-client/login-window-profiles.png)
-
-Here you can view your currently created profiles. You must create at least one to proceed.
-:::tip Multiple Profiles
-GameVault supports the use of [multiple profiles on the same client](../gamevault-plus/multi-profile.md). This allows you to log in with different user accounts on different servers using a single device. However, this feature is only available with a [GameVault+ subscription](../gamevault-plus/introduction.md).
-:::
-
-:::info Demo User
-If you do not have any profiles or a running GameVault Server, a demo profile will appear in the list. You can use this profile to test the client. This profile will be removed as soon as you create at least one profile of your own.
-
-To manually add the demo user profile:
-
-Server URL: **demo.gamevau.lt**  
-Username: **demo**  
-Password: **demodemo**  
-:::
-
-### Method 1: Sign In with an Existing User Account
-
-Click on "New Profile" -> "Sign In".
-
-![signin](/img/docs/setup-client/login-window-signin.png)
-
-First enter your server URL, then your username and password. If you want to sign in using SSO, check the box "Sign in using your Identity Provider" at the bottom.
-
-See more details about [Server Input Validation](setup.md#server-input-validation) (if input boxes are grayed out and you don't know why).
-
-See more details about [SSO Login](setup.md#sso-login) if you want to log in using an identity provider (or don't know why fields are grayed out after checking the box).
-
-If you press the "Save" button, a new profile will be created and you will be returned to the profile overview.
-
-If you press the "Save and Login" button, GameVault will create the profile and immediately attempt to launch it.
-
-### Method 2: Sign Up by Creating a New User Account
-
-Click on "New Profile" -> "Sign Up".
-
-![signup](/img/docs/setup-client/login-window-signup.png)
-
-First enter your server URL, then fill out the remaining fields.
-
-See more details about [Server Input Validation](setup.md#server-input-validation) (if input boxes are grayed out and you don't know why).
-
-See more details about [SSO Login](setup.md#sso-login) if you want to log in using an identity provider (or don't know why fields are grayed out after checking the box).
-
-What happens after clicking "Save and Sign Up" depends on the server configuration:
-
-    - A: The new user is activated immediately upon signing up, and you will be logged in.
-    - B: The new user must first be activated by an administrator. In that case, the following UI is shown:
-
-![pendingactivation](/img/docs/setup-client/login-window-pending-activation.png)
-
-You can return to the profile selection or wait for an admin to activate your account. Once that happens, the client logs you in automatically.
-
-### Server Input Validation
-
-Both Sign In and Sign Up include built-in input validation for the server URL. The client checks whether the server is accessible. In addition, some fields may be required by the server configuration, or SSO may be enforced. These requirements will be reflected in the input validation.
-
-A valid GameVault server address will be marked with a green check mark. If the URL cannot be reached or other problems occur, a red error symbol appears. Hover over it for more detailed error information.
-
-### SSO Login
-
-When using SSO, you authenticate via the identity provider configured on the server, such as Google, Microsoft, or GitHub, instead of using a username and password. On your first login or after session expiration, a webview popup opens to redirect you to the provider’s authentication page.
-
-After checking "Sign in using your Identity Provider" in the Sign In or Sign Up dialogs, all fields except the server URL will be grayed out. This is because GameVault retrieves all necessary information from the identity provider.
-
-### Additional Request Headers
-
-Click the gear icon in the top right corner of the login window to access the login settings.
-
-There you can configure additional request headers.
-
-![pendingactivation](/img/docs/setup-client/login-window-settings.png)
-
-Click the "Add" button to create a new request header (key/value pair). Enter your data and press "Save". Remove a header by clicking the red cross icon next to it.
-
-These headers are sent with every web request from the client and are useful if your server has special connection requirements.
-
-### Select the Root Directories
-
-The final required step to properly use the GameVault client is selecting the root directories.
-
-These are the locations where your downloaded and installed games will be stored. They act as base folders for your game library. We recommend reading the ["How to Use" chapter](how-to-use.md) for more details on root folder management.
-
-Navigate to:
-**Settings → Data → File System → Root Directories**
-
-![rootpath](/img/docs/setup-client/client-settings-root-path.png)
-
-Click "Add" and select your desired path in the file dialog. Repeat to add multiple root directories.
-
-:::note Please Note
-GameVault will automatically create a subfolder named `GameVault` in each selected directory and initialize it with the required data.
-:::
-
-## Next Step
-
-Your client is now ready to use.
-
-For day-to-day usage, read the ["How to Use" chapter](how-to-use.md).
+Open your server's public address, such as `https://games.example.com` or
+`http://SERVER-IP:8080`. The Compose frontend container serves the interface and
+forwards API and WebSocket requests to the separate backend container. You do not
+need a separate public backend address.
+
+A browser can browse games, use account and administration features, download
+files, and upload or download save archives. It cannot run the native game's
+installer, launch local executables, track local processes, or restore a save
+archive directly into a local game folder. Use a desktop client for those actions.
+
+### Windows application
+
+Download the x64 installer or portable ZIP from
+[PlayStash Windows application Releases](https://github.com/PlayStash/playstash-app/releases).
+Windows 11 or newer is required. The packages are self-contained: you do not need
+to install a separate .NET runtime.
+
+Run the installer, or extract the complete portable ZIP and launch `playstash.exe`.
+Keep its accompanying libraries and files. The installer defaults to
+`%LOCALAPPDATA%\Programs\PlayStash`. These packages currently have no configured
+publisher signing certificate; evaluate Windows security prompts for the file you
+actually downloaded.
+
+The WPF application has its own profile chooser, themes, settings and integrations.
+It is not the same executable or settings store as the Tauri desktop client.
+
+## Initial configuration
+
+Use the same public server URL in every client, including `https://` and any
+configured port. For the supplied Compose, use the frontend's host port, not an
+internal container address. Do not append `/api` to the normal server address.
+
+### Browser and cross-platform desktop
+
+In the desktop sign-in screen, enter `Server` and choose `Continue`. Then enter
+`Username or Email` and `Password`, and choose `Login`. The browser uses the
+address of the instance you opened.
+
+Choose `Sign up` to register if Basic registration is enabled. On a fresh server,
+the first registered account is an active administrator; subsequent accounts in
+the standard setup need administrator activation. Disabled registration requires
+an existing account or the server's configured SSO flow.
+
+### Windows profiles
+
+On the WPF profile chooser, use `New Profile`, then `Sign In` or `Sign Up`. Enter
+the server URL and your own account details. You can save multiple profiles for
+different servers and users without a paid subscription. Change profiles under
+`Settings → User → Change Profile`.
+
+`Import Server Connection` imports a shared server URL and installation preferences;
+it does not log you in. Authenticate with your own account after importing. To
+export a connection, use `Settings → Installation → Export Server Connection`.
+Including an archive password requires explicit confirmation and writes it into
+the exported JSON as plaintext. Account passwords, API keys and session tokens
+are excluded. Treat exports that include an archive password as private files.
+
+### Server input validation
+
+The client checks the server and its advertised authentication options. If it
+cannot connect, confirm the public URL, frontend/API health and reverse-proxy
+WebSocket support. A Docker service name such as `playstash-backend` is only valid
+inside the Compose network, not on another computer.
+
+### SSO login
+
+SSO is available only when an administrator has configured an identity provider
+on the backend. The browser/Tauri interface offers `Login with SSO` or
+`Continue with SSO`; the WPF sign-in form uses `Sign in using your Identity Provider`.
+Complete authentication with the configured provider. Provider configuration and
+account activation remain server responsibilities.
+
+### Additional request headers
+
+The WPF login window's settings can configure additional request headers for
+instances behind an access gateway. These are connection settings for that
+application; the browser/Tauri login does not offer the same header editor.
+Do not put IGDB or Steam metadata settings here: those belong to the backend.
+
+### Select the root directories
+
+The Tauri desktop client stores games in locations chosen under
+`Settings → Downloads → Download locations → Add Download Location`. You can add
+multiple locations and choose the location when downloading. A `PlayStash`
+subfolder is created inside each selected location.
+
+The WPF application uses
+`Settings → Data → File System → Root Directories`. Add one or more directories;
+it creates separate `PlayStash\Downloads` and `PlayStash\Installations` trees.
+
+Browser sessions use the browser's download destination and have no native game
+root selector. See [How to use](./how-to-use.md) and [Data management](./data.md)
+for the distinct directory layouts.

@@ -1,130 +1,48 @@
 ---
 sidebar_position: 3
-sidebar_title: "Adding Games"
+sidebar_title: Adding Games
 ---
 
-# Adding Games to GameVault
+# Adding games
 
-If you wish to add games to your server but are struggling with unorganized files, varying file formats, and compressed files, you have come to the right place. In this chapter, you will learn the correct process to add games to your GameVault server.
+Place your DRM-free game files into the host `games/` folder beside the Compose file. Read [file/folder structure](structure.md) before naming and grouping your games.
 
-## Before You Begin
+## Prepare an archive or folder
 
-Please read the [File and Folder Structure](structure.md) chapter first.
+An existing ZIP/7z archive can be imported as it is. Keep installers and their related `.bin`/data files together. You can archive them yourself or use [an unpacked game folder with an optional package manifest](packages.md). Archiving is not mandatory for supported folder games.
 
-Adding games to your server is a manual process that demands effort and expertise. However, it is worth the effort. To execute the task accurately, follow the steps outlined below for each game. With practice, you will become more proficient and adept at performing these steps with ease.
+For an archive, a useful filename is:
 
-## Step 1: Preparing
-
-Suppose you have obtained a DRM-free copy of "Crawl," and it is located in your file system as follows:
-
-- Crawl/
-  - setup.bin
-  - setup.exe
-
-:::note
-This is not a real-world example.
-:::
-
-If the game files are already compressed in a format that GameVault can understand, such as "Crawl.zip", you can skip the next step. However, if you want to maximize disk space and repack the files, you can do that. Datahoarders, for example, rely on every bit and byte on their disks and tend to repack everything to the maximum compression available.
-
-## Step 2: Compression
-
-To make your game files compatible with GameVault, you need to archive them. We recommend using [7Zip](https://www.7-zip.org/) for this. There are different approaches to this.
-
-:::tip single-file executables
-If the game you're about to add only consists of a single executable file such as `setup_game.exe` or `setup_game.sh`, you can choose to skip this stage and proceed with [naming it](#step-3-naming-the-archive). See [here](structure.md#single-file-executable) for more details.
-:::
-
-### Method 1: The Fast Way
-
-The fastest way to compress your game files into a .7z archive is by copying them without compression, which takes little to no time or effort. However, the resulting archive will be as large as the original folder.
-
-```bash
-7z a -mx=0 -ms=off game.7z /path/to/game/folder/Crawl/*
+```text
+My Game (v1.2.0) (2024).zip
 ```
 
-This command uses the following options:
+The type is detected from its contents, or use [a type override](game-types.md) when detection is unsuitable. The backend only indexes and serves files; it does not run game installers.
 
-- `a`: Add files to the archive
-- `-mx=0`: Sets the compression level to 0
-- `-ms=off`: Turns off solid block compression
+## Keeping multiple versions of the same game
 
-### Method 2: The Hardcore Way
+These files become versions of one shared game:
 
-Use the maximum 7-Zip settings if you want the smallest archive size. Depending on the game and your hardware, the result may be only slightly smaller, and the compression step can take a long time.
-
-```bash
-7z a -mx=9 -mfb=64 -md=32m -ms=on game.7z /path/to/game/folder/Crawl/*
+```text
+My Game (v1.0.0) (2024).zip
+My Game (v1.2.0) (2024).7z
 ```
 
-This command uses the following options:
+Same-title files without year tags share a no-year bucket. Progress, bookmarks and metadata belong to the shared game entity. The server ranks the active versions and selects a default download.
 
-- `a`: Add files to the archive
-- `-mx=9`: Use the maximum compression level
-- `-mfb=64`: Set the number of fast bytes to 64
-- `-md=32m`: Set the dictionary size to 32MB
-- `-ms=on`: Enable solid block compression
+## Keeping separate entries on purpose
 
-### Method 3: The Balanced Way
+Use distinct titles for intentionally separate editions or modpacks. Square brackets remain part of the title:
 
-If you are not happy with either method, you can use the preselected options of 7zip to compress the files as effectively and balanced as possible:
-
-```bash
-7z a game.7z /path/to/game/folder/Crawl/*
+```text
+My Game [Original] (v1.2.0) (2024).zip
+My Game [Community Modpack] (v1.2.0) (2024).zip
 ```
 
-## Step 3: Naming the Archive
+## Add files or upload
 
-Before naming the archive, take a moment to research the game you're about to add. Ask yourself questions or use a search engine to answer  the following questions:
+Copy your finished archive/folder into `games/`, using an account permitted to write the backend's storage. Let copying finish before indexing; a partially written file is not a complete game package. The watcher and periodic scan normally pick up changes. In **Administration → Actions → Reindex Games**, an administrator can request an immediate full scan.
 
-- "What version is the game?"
-- "What year was the game released?"
-- "Is the game still in early access?"
+Administrators can also upload one supported game file through the client or `POST /api/games` with multipart field `file`. Uploads stream to temporary disk storage. The backend needs writable `VOLUMES_FILES`; `GAMES_MAX_UPLOAD_SIZE` defaults to `100gb`. A value of `0` removes the application upload-size limit; it does **not** turn uploads off. Align the outer proxy's limit and available disk space with your chosen limit.
 
-Once you have gathered all the necessary information, you can name the archive using the [GameVault Naming Structure](structure.md).
-
-In our fictitious example we have a copy of Crawl Version 1.0.1 released in 2014, so we named the archive:
-
-```bash
-Crawl (v1.0.1) (2014).7z
-```
-
-### Keeping multiple versions of the same game
-
-GameVault supports multiple downloadable versions per game.
-
-If you add files that resolve to the same game identity (same title and release-year bucket), GameVault keeps them as versions of one game instead of creating separate game entries.
-
-Files without a release-year tag are grouped into a shared no-year bucket first, so multiple untagged files with the same title are also merged into versions of one game instead of creating separate entries. If you want same-title files to stay separate, make the titles distinct using square brackets `[]` (see below).
-
-**Example (same game, multiple versions):**
-
-- `Minecraft (v1.7.10) (2011).zip`
-- `Minecraft (v1.13.2) (2011).zip`
-
-:::info
-Will result in one game with multiple downloadable versions.
-:::
-
-### Keeping separate entries on purpose
-
-If you intentionally want multiple entries with similar base titles (e.g. different modpacks), make the titles distinct using square brackets `[]`.
-
-**Example (separate game entries):**
-
-- `Minecraft [Tekkit Modpack] (v1.7.10) (2011).zip`
-- `Minecraft [Hexxit Modpack] (v1.13.2) (2011).zip`
-
-:::info
-Will result in two separate games.
-:::
-
-## Step 4: Deploy 🥳
-
-Once you have named the archive, place it into the folder on your host system that is mounted to GameVault's files folder (by default `/files`). Once the archive is in place, GameVault will automatically index the game, enrich it with metadata, and save it in your database.
-
-:::tip Uploading via API
-Starting with version v16.3.0, administrators can also upload game files directly through the `POST /api/games` endpoint. The server must have **write permissions** on the files volume (`VOLUMES_FILES`) for this to work. The maximum upload size is controlled by `GAMES_MAX_UPLOAD_SIZE` (default `100 gb`); set it to `0` to disable uploads entirely.
-:::
-
-Congratulations! You have successfully added a game to your GameVault server. Repeat the process for any additional games you want to add.
+Enable [Steam or IGDB](metadata-enrichment/metadata.md) if you want remote descriptions and artwork. With no active provider, your files can still be indexed and metadata/images can be entered manually. See [folder tags](folder-tags.md) to categorize imports automatically.

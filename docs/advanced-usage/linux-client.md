@@ -1,53 +1,20 @@
-# Running the Client on Linux
+---
+sidebar_position: 3
+---
 
-This page serves as a community-driven guide to assist you in setting up the GameVault client on Linux.
+# Linux desktop
 
-:::tip Native Linux client
-The [cross-platform client](../client-docs/setup.md#gamevault-desktop-cross-platform) (still in **early access**) ships native Linux packages (`.deb` and `.AppImage`) and no longer requires Wine. The guide below is only relevant if you want to run the **legacy Windows app**.
-:::
+Use the native cross-platform .AppImage or .deb from
+[frontend releases](https://github.com/PlayStash/playstash-frontend/releases).
+GitHub sign-in and private repository access are required.
 
-:::warning
-Please note that running GameVault on Linux using this method is considered **unsupported** and **unrecommended**. It should only be utilized as a last resort when no other options are available.
-:::
+AppImage includes the build's media framework. Debian packages are installed and
+updated manually. Desktop packages are Linux x64; server AMD64/ARM64 images do
+not imply ARM64 desktop installers.
 
-## Getting the application
+Windows-game compatibility depends on your local Wine/Proton setup and the game.
+Configure local launch settings and inspect launch logs for failures. The server
+does not install Wine or launch games.
 
-To start, you need the Application files. The simplest way to get them is explained [here](../client-docs/setup.md#option-1-obtain-pre-built-artifacts-from-github).
-
-## Setting up with Wine
-
-1. Install Wine and winetricks
-2. Run `winetricks dotnetdesktop6` in a terminal
-3. Launch `gamevault.exe`
-
-## Setting up with Bottles
-
-:::tip
-
-When using Bottles under flatpak, your data will be in the following directory:
-
-`~/.var/app/com.usebottles.bottles/data/bottles/[YOUR BOTTLE NAME]`
-
-Keep that in mind when unpacking games to install them.
-
-:::
-
-1. Install [Bottles](https://usebottles.com/)
-2. Create a new bottle  
-   ![Creating a new Bottle](/img/linux/bottles/make_bottle.png)
-3. Inside your bottle click `Dependencies` and install `dotnetcoredesktop6`  
-   ![Configuring the .NET Core Dependency](/img/linux/bottles/dotnet.png)
-4. Go back to the main page for your bottle and press `Run Executable...` and select `gamevault.exe`
-
-## Updating the Client
-
-:::warning
-Since there is currently no auto-update functionality available (as mentioned in [this link](../client-docs/updating-client.md#other-sources)), it is your responsibility to manually update your GameVault client. To update your client, you will need to repeat the procedure in this documentation.
-:::
-
-## Known issues
-
-- Text can look very broken if certain fonts are not installed on your system.
-  - If you're on Arch Linux, [this](https://aur.archlinux.org/packages/ttf-ms-win11-auto) AUR package fixes the issue.
-  - If you're on Debian, you could try to use [this](https://packages.debian.org/ttf-mscorefonts-installer) package. (untested)
-  - Additionally - you can also try [this](https://archive.org/details/windows-11-21h2-complete-font-collection) and install it to your wine prefix's fonts folder ~/.wine/drive_c/windows/Fonts ; This works on the steamdeck
+The WPF application requires Windows 11 or newer. Old community Wine/Bottles
+instructions are not the native Linux installation path.

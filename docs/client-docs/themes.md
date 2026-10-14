@@ -1,22 +1,75 @@
 ---
-title: "Themes"
+title: Themes
+sidebar_position: 5
 ---
 
-GameVault offers the option to apply different themes to your GameVault client application. With [GameVault+](/docs/gamevault-plus/introduction), you gain access to a variety of additional themes and also the ability to apply custom themes, to personalize your experience.
+Theme controls differ between the browser/Tauri frontend and the WPF Windows
+application. All provided theme features are available without a subscription.
 
-## Free Themes
+## Browser and cross-platform desktop
 
-- **Default (Dark)**: The default GameVault theme, reflecting the 2024 GameVault rebrand with dark tones.
-  ![Default (Dark)](/img/themes/default_dark.png)
-- **Default (Light)**: An alternative light version of the default GameVault theme, also based on the 2024 GameVault rebrand.
-  ![Default (Light)](/img/themes/default_light.png)
-- **Classic (Dark)**: This theme preserves the traditional application colors for users accustomed to the old design.
-  ![Classic (Dark)](/img/themes/classic_dark.png)
+Open `Settings → Appearance → Theme` and choose `System`, `Light` or `Dark`.
+`System` follows the device's color-scheme preference. The choice is saved locally
+and does not change other users' interfaces.
 
-## Premium Themes
+The current frontend does not import WPF XAML community themes or provide the
+WPF palette generator. Its `Appearance` controls also include interface language,
+zoom and `Streamer / OPSEC Mode`; masking displayed details does not change
+server-side permissions or what authenticated requests contain.
 
-[GameVault+](/docs/gamevault-plus/introduction) comes with more themes you can choose from. A list of premium themes is available in the [GameVault+ Themes](/docs/gamevault-plus/themes) section of the documentation.
+## Windows application
 
-## Custom Themes
+Open `Settings → Application → Theme`. Choose from `Installed Themes`.
+Use `Open Theme Folder` to open the active profile's import directory, and
+`Reload Theme List` after adding a theme. Theme imports belong to that WPF profile,
+not to the backend or the Tauri application.
 
-Custom themes are only available for [GameVault+](/docs/gamevault-plus/introduction) subscribers. See [GameVault+ Themes](/docs/gamevault-plus/themes) for more information.
+The [community theme repository](https://github.com/PlayStash/playstash-community-themes)
+is private. An anonymous in-app community list may therefore be unavailable.
+Download accessible themes while signed in to GitHub, put their XAML files and
+required local images in the profile's theme directory, reload the list and select
+the theme. The folder is under the profile's
+`%APPDATA%\PlayStash\profiles/<server-key>/<profile-id>/themes/` path.
+
+## Custom themes
+
+The WPF application provides `Settings → Application → Create a Theme`:
+
+1. Enter a name and choose the main color.
+2. Select `Generate`, then adjust background, panel, text and border colors.
+3. Optionally choose `Choose Optional Overlay Image`.
+4. Choose `Export Theme`, keep the exported image beside the XAML when present,
+   then import through the profile's theme folder.
+
+### Schema 1 and schema 2
+
+Schema 1 themes define the theme metadata and ten PlayStash colors. Schema 2
+supports the same colors plus an optional local overlay image. The importer reads
+theme data only; arbitrary XAML objects, markup extensions, merged dictionaries,
+remote image URLs and filesystem links are rejected.
+
+Required metadata includes `Theme.SchemaVersion`, `Theme.Name`,
+`Theme.DisplayName`, `Theme.Description` and `Theme.Author`. The supported colors
+are:
+
+| Resource prefix `PlayStash.Colors.` | Purpose |
+| --- | --- |
+| `Foreground`, `Foreground2` | Text colors |
+| `Background`, `Background2` | Background and panel colors |
+| `Accent`, `Accent2`, `Accent3`, `Accent4` | Accent colors |
+| `Border` | Borders |
+| `Blur` | Blur/background effect color |
+
+A schema 2 theme can include a relative overlay resource, for example this excerpt:
+
+```xml
+<BitmapImage x:Key="PlayStash.Images.Overlay" UriSource="overlay.png" />
+```
+
+Use PNG, JPEG, BMP or GIF and keep it with the theme. Theme text is limited to
+64 KiB of characters; images are limited to 16 MiB, 128 frames and 16 million
+pixels across all frames. These limits also apply to generated/imported overlays.
+The generator is the easiest way to produce a complete compatible theme.
+
+See [Data management](./data.md) for the profile layout. WPF themes do not style
+the browser, Tauri interface or server API.

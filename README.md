@@ -21,7 +21,11 @@ Use the Node.js and pnpm versions declared in package.json:
 ```sh
 pnpm install --frozen-lockfile
 pnpm start
+pnpm check:docs
+pnpm check:security
+pnpm audit --audit-level=low
 pnpm build
+pnpm check:site
 ```
 
 GitHub-hosted workflows check dependencies, secrets, content and the production

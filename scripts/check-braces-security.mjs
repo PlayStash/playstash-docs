@@ -57,9 +57,10 @@ assert.equal(installedPackage.version, "3.0.3-playstash.1");
 const patched = installedRequire(installedEntry);
 const fillRangeModules = path.dirname(path.dirname(installedRequire.resolve("fill-range/package.json")));
 
-// Execute the unmodified upstream package in a separate process. Its original
-// source bytes above are verified independently of the local security patch.
-const baselineRun = (operation, inputKind) => JSON.parse(execFileSync(process.execPath, [
+// Verify attacks in separate processes with the same explicit V8 stack budget.
+// Default stack limits and JIT decisions differ between operating systems.
+const childRun = (entry, operation, inputKind, boundedStack = false) => JSON.parse(execFileSync(process.execPath, [
+  ...(boundedStack ? ["--stack-size=256"] : []),
   "--eval",
   `const braces = require(process.argv[1]);
    const operation = process.argv[2];
@@ -72,12 +73,13 @@ const baselineRun = (operation, inputKind) => JSON.parse(execFileSync(process.ex
            return ast; })()
        : JSON.parse(kind);
    try {
-     console.log(JSON.stringify({ value: braces[operation](input.pattern || input, input.options || {}) }));
+     console.log(JSON.stringify({ value: braces[operation](input.pattern || input, input.options || {}), boundedStack: process.execArgv.includes('--stack-size=256') }));
    } catch (error) {
-     console.log(JSON.stringify({ error: { name: error.name, message: error.message } }));
+     console.log(JSON.stringify({ error: { name: error.name, message: error.message, code: error.code }, boundedStack: process.execArgv.includes('--stack-size=256') }));
    }`,
-  path.join(baselineDir, "index.js"), operation, inputKind,
+  entry, operation, inputKind,
 ], { encoding: "utf8", timeout: 5000, env: { ...process.env, NODE_PATH: fillRangeModules } }));
+const baselineRun = (operation, inputKind) => childRun(path.join(baselineDir, "index.js"), operation, inputKind);
 
 const guarded = error => error instanceof SyntaxError && error.code === "ERR_BRACES_COMPLEXITY";
 
@@ -88,10 +90,15 @@ test("original source and unchanged license are pinned", () => {
 });
 
 for (const operation of ["compile", "expand", "stringify"]) {
-  test(`unmodified upstream ${operation} exhausts the stack on nested ${operation === "expand" ? "patterns" : "caller ASTs"}`, () => {
-    const result = baselineRun(operation, operation === "expand" ? "deep" : "deep-ast");
+  test(`upstream ${operation} overflows and the installed fork rejects the same pattern with a 256 KiB stack`, () => {
+    const result = childRun(path.join(baselineDir, "index.js"), operation, "deep", true);
+    assert.equal(result.boundedStack, true);
     assert.equal(result.error?.name, "RangeError");
     assert.match(result.error.message, /maximum call stack/i);
+    const fixed = childRun(installedEntry, operation, "deep", true);
+    assert.equal(fixed.boundedStack, true);
+    assert.equal(fixed.error?.name, "SyntaxError");
+    assert.equal(fixed.error.code, "ERR_BRACES_COMPLEXITY");
   });
   test(`installed transitive ${operation} rejects excessive pattern nesting safely`, () => {
     const pattern = "{".repeat(4999) + "x" + "}".repeat(4999);

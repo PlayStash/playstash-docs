@@ -20,10 +20,17 @@ cannot be raised by caller options. Invalid complexity throws a controlled
 Only `lib/parse.js`, `lib/compile.js`, `lib/expand.js` and `lib/stringify.js`
 change, plus the new `lib/depth-guard.js`. Other source files are unchanged.
 `scripts/check-braces-security.mjs` verifies the original source fixture hashes,
-demonstrates stack exhaustion in unmodified upstream walkers, exercises the
-installed transitive fork against the same inputs, tests direct AST bypasses,
-and compares ordinary glob/range behavior with upstream. The production
-Docusaurus build verifies compatibility with this dependency tree.
+demonstrates stack exhaustion in unmodified upstream walkers and checks the
+installed transitive fork against the same pattern in separate child processes,
+each given the identical explicit V8 stack budget of 256 KiB. The 4,999 nested
+braces produce 9,999 characters, within upstream's 10,000-character limit. This
+controlled budget makes the negative control independent of platform default
+stack limits and JIT decisions: upstream must throw a stack-overflow
+`RangeError`, while the fork must return the controlled complexity `SyntaxError`.
+Additional checks exercise direct AST bypasses and ordinary glob/range behavior
+with the default Node.js stack. This budget applies only to the attack regression
+workers; production stack settings are unchanged. The production Docusaurus
+build verifies compatibility with this dependency tree.
 
 The dependency audit includes the fork's transitive dependencies. No advisory
 IDs or severities are ignored. A clean registry audit alone does not validate

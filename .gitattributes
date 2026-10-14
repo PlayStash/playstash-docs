@@ -9,3 +9,5 @@
 *.css text eol=lf
 *.txt text eol=lf
 LICENSE -text
+**/LICENSE -text
+static/licenses/* -text

@@ -43,8 +43,6 @@ Only main and dev are maintained and synchronized. PLAYSTASH_RUN_SELF_HOSTED
 is false; it does not block hosted jobs. Read [AGENTS.md](AGENTS.md) and update
 [CHANGELOG.md](CHANGELOG.md) with changes visible to readers.
 
-## Attribution and license
+## License
 
-Derived from documentation by Alkan Alper, Schäfer Philip GbR / Phalcode and
-contributors. Attribution and the original license are preserved in
-[NOTICE.txt](NOTICE.txt) and [LICENSE](LICENSE): CC BY-NC-SA 4.0.
+Licensed under CC BY-NC-SA 4.0; see [LICENSE](LICENSE) and [NOTICE.txt](NOTICE.txt).

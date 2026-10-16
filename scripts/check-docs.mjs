@@ -23,7 +23,7 @@ function markdownFiles(directory) {
 }
 for (const file of markdownFiles(join(root, 'docs'))) {
   const content = readFileSync(file, 'utf8');
-  check(!/gamevault|gamevau\.lt|WEB_UI_|SERVER_WEB_UI_ENABLED|SERVER_LANDING_PAGE_ENABLED/i.test(content), `Obsolete product/configuration in ${file}`);
+  check(!/g[a]mevault|g[a]mevau\.lt|ph[a]lcode|WEB_UI_|SERVER_WEB_UI_ENABLED|SERVER_LANDING_PAGE_ENABLED/i.test(content), `Obsolete product/configuration in ${file}`);
 }
 const configuration = read('docs/server-docs/configuration.md');
 for (const key of checkpoint.backendEnvironmentKeys) {

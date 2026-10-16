@@ -4,6 +4,7 @@
 
 ### Changes
 
+- The license page and README point to `NOTICE.txt` for the attribution.
 - Documented independent frontend and backend container publication, current image repositories/tags, automatic hosted builds, and server updates using Compose pull/up without building source.
 - Updated repository/download visibility: frontend and backend sources and published releases are public, including signed Tauri updater feeds; documentation and the other repositories remain private.
 - Documented Tauri 17.3.1 local `.ludusavi.yaml` detection in versioned installation folders, save/config examples, opt-in automatic sync and its server prerequisites and detection limits.

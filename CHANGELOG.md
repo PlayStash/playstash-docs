@@ -4,6 +4,7 @@
 
 ### Changes
 
+- Documented Tauri 17.3.1 local `.ludusavi.yaml` detection in versioned installation folders, save/config examples, opt-in automatic sync and its server prerequisites and detection limits.
 - Imported documentation into the private PlayStash organization with synchronized main and dev branches.
 - Replaced obsolete branding, subscription requirements, vendor-store links and promotional content with current PlayStash guidance.
 - Documented separate frontend/API containers and PostgreSQL in one Compose, first administrator, registration controls, proxies, updates and backups.

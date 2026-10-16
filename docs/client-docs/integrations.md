@@ -3,11 +3,11 @@ title: Integrations and save versions
 sidebar_position: 6
 ---
 
-The WPF Windows application has an `Integrations` settings tab. The browser/Tauri
-frontend provides separate save-version and package controls; it does not offer
-the same Steam/Discord integration settings. No integration requires a paid
-PlayStash subscription, but local software, your own credentials and server
-permissions still apply.
+The native desktop applications provide integration settings and automatic cloud
+saves. Browser users can manage save archives manually. No integration requires a
+paid PlayStash subscription, but local software, your own credentials and server
+permissions still apply. The sections below distinguish desktop automation from
+manual save-version controls.
 
 ## WPF Steam shortcuts
 
@@ -76,10 +76,74 @@ Select the game's real save folder, then confirm `Restore and overwrite files`.
 Keep a copy of files you want to retain. The browser can download the archive for
 manual restoration but cannot write it directly into your game's local save folder.
 
-These controls manage explicit ZIP uploads and restores. They do not provide the
-WPF client's automatic Ludusavi save detection or automatic before/after-launch sync.
-WPF backups use Ludusavi's archive layout; do not assume those archives can be
-restored as a plain relative-path ZIP by the Tauri restore control.
+These controls manage explicit ZIP uploads and restores. Automatic desktop cloud
+saves use Ludusavi's archive layout and their own restore operation; do not assume
+those archives can be restored as a plain relative-path ZIP through the folder
+chooser.
+
+## Tauri automatic cloud saves
+
+The Tauri desktop client uses its bundled Ludusavi tool to find save files. Enable
+[save storage on the server](#server-prerequisites-for-saves), then open
+`Settings → Integrations → Cloud Saves → Sync cloud saves`. This switch is
+**off by default**. When enabled, PlayStash attempts a restore before launching a
+game and a backup/upload after its tracked session ends. Keep the desktop client
+running while playing, and check its sync messages for failures or conflicts.
+
+`Custom Ludusavi Manifests` accepts local file paths or HTTP(S) URLs. Use `Add`,
+enter each path or URL, then select `Save`. `Use Primary Manifest` is enabled by
+default; it can be disabled when you want to use your own definitions. These
+settings remain available alongside bundled local manifests.
+
+### Bundle a save definition with a game
+
+Starting with Tauri **17.3.1**, PlayStash explicitly includes
+`<actual installation folder>/.ludusavi.yaml` when finding and backing up a game.
+This also works with the versioned installation layout:
+
+```text
+<Root>/PlayStash/<Title>/Versions/<Version>/Installation/.ludusavi.yaml
+```
+
+Place the file directly in the game's actual installation folder, alongside its
+installed files. A copy left only in `Download` or `Extraction` is not the installed
+game's local manifest. You do not need to add this installed file manually to
+`Custom Ludusavi Manifests`.
+
+For automatic detection, use a regular YAML file no larger than **1 MiB**. An
+invalid definition produces a sync error; correct the manifest before trying again.
+
+For a game named `My Game` that writes saves to its own `saves/` folder and settings
+to `settings.json`, use this `.ludusavi.yaml`:
+
+```yaml
+My Game:
+  files:
+    <base>/saves:
+      tags:
+        - save
+    <base>/settings.json:
+      tags:
+        - config
+```
+
+Replace `My Game` with the game's matching PlayStash title. Matching uses its
+metadata title when available, falling back to its game title, and still requires
+a confident Ludusavi match. The client does not blindly choose the first entry in
+a local manifest.
+
+For this bundled manifest, `<base>` resolves to the installation folder containing
+`.ludusavi.yaml`. The example therefore collects that folder's `saves/` tree and
+`settings.json`; change the definitions to the locations the game actually uses.
+The generated `.playstash.game.config.json` keeps installation/launch state; save
+path definitions belong in the Ludusavi manifest. See the
+[Ludusavi manifest format](https://github.com/mtkennerly/ludusavi-manifest#format)
+for other supported placeholders and file definitions.
+
+Detection uses these manifests and their declared paths. It does not monitor a
+game's file accesses or inspect an arbitrary executable to discover every save or
+configuration path. Games missing a correct matching definition need an adjusted
+manifest or manual save archives. Browser downloads do not run this native sync.
 
 ## WPF automatic cloud saves
 

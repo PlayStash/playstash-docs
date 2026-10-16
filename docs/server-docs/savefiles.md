@@ -14,6 +14,14 @@ Run `docker compose up -d`. The supplied Compose already mounts `data/savefiles/
 
 Upload a ZIP with paths relative to the game's actual save folder. The frontend exposes versioned saves on a game page. A browser can upload/download/delete its save archives. In the desktop client, **Restore to save folder** asks you to select the local target and confirm overwrites before extraction. A stored archive does not make every game synchronize automatically; the client needs the correct save location.
 
+For automatic synchronization, enable `Sync cloud saves` in the Tauri desktop
+client's `Settings → Integrations → Cloud Saves`; it is off by default. Ludusavi
+restores before launch and backs up after the tracked session ends. Tauri 17.3.1
+also explicitly includes a game's installed `.ludusavi.yaml`, including versioned
+installation folders. See [automatic cloud saves and a local manifest
+example](../client-docs/integrations.md#tauri-automatic-cloud-saves). Server storage
+alone does not discover save paths, and the browser does not run this native sync.
+
 ## Ownership and API
 
 The owner or an administrator can manage saves, subject to current game access and age restrictions:

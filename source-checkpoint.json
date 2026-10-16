@@ -1,12 +1,23 @@
 {
-  "verifiedDate": "2026-10-14",
-  "backendVersion": "17.1.4",
-  "backendReleaseCommit": "d2e4a4b9c9374dbe3111369a15f3def8983584e7",
-  "frontendVersion": "17.2.3",
-  "frontendReleaseCommit": "de20c44fe57a404e32ff450aaf4977f0a107efcf",
-  "windowsApplicationVersion": "1.18.1",
+  "verifiedDate": "2026-10-16",
+  "verificationScope": "Independent frontend/backend image publication, source/package visibility, production Compose, update instructions and declared CI security/runtime contracts.",
+  "backendVersion": "17.1.5",
+  "backendReleaseCommit": "0c2c486928e45834de4e63faaac7f151d8d7b43c",
+  "frontendVersion": "17.3.2",
+  "frontendReleaseCommit": "ee9ba6669e438f47e7e35f8dc49e649bee145d46",
+  "repositoryVisibility": {
+    "playstash-frontend": "public",
+    "playstash-backend": "public",
+    "playstash-docs": "private"
+  },
   "importedDocumentationCommit": "c3cbde9bd5af111efb02e1cf4994b966ed19ba22",
-  "composeSha256": "fbe2e1b34fd7e17d6db520c782af4919f703969dc87b313364ca5f9a1cada19e",
+  "composeSha256": "fe22bf8b8bf7370aa75df2a85042972e874a844569bbdcfbc02c136241571cd9",
+  "composeImages": {
+    "playstash-init": "ghcr.io/playstash/playstash-backend:latest",
+    "db": "ghcr.io/playstash/playstash-backend:postgres16",
+    "playstash-backend": "ghcr.io/playstash/playstash-backend:latest",
+    "playstash-frontend": "ghcr.io/playstash/playstash-frontend:latest"
+  },
   "backendEnvironmentKeys": [
     "AUTH_ACCESS_TOKEN_EXPIRES_IN",
     "AUTH_API_KEY_ENABLED",
@@ -130,5 +141,22 @@
     "docs/client-docs/updating-client.md",
     "docs/client-docs/integrations.md",
     "docs/advanced-usage/development.md"
+  ],
+  "featureGuideBaseline": {
+    "verifiedDate": "2026-10-14",
+    "backendVersion": "17.1.4",
+    "backendReleaseCommit": "d2e4a4b9c9374dbe3111369a15f3def8983584e7",
+    "frontendVersion": "17.2.3",
+    "frontendReleaseCommit": "de20c44fe57a404e32ff450aaf4977f0a107efcf",
+    "windowsApplicationVersion": "1.18.1",
+    "scope": "Complete feature/UI and configuration review; later focused updates are listed separately."
+  },
+  "focusedClientReviews": [
+    {
+      "verifiedDate": "2026-10-16",
+      "frontendVersion": "17.3.1",
+      "frontendSourceCommit": "1b750e3387782d096398632e700203638e9268e8",
+      "scope": "Game-local Ludusavi manifest detection, configuration, install-folder save/config example and detection limits."
+    }
   ]
 }

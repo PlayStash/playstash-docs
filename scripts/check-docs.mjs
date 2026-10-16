@@ -2,11 +2,16 @@ import { createHash } from 'node:crypto';
 import { readFileSync, readdirSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { createRequire } from 'node:module';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const checkpoint = JSON.parse(readFileSync(join(root, 'source-checkpoint.json'), 'utf8'));
 const read = (file) => readFileSync(join(root, file), 'utf8');
 const failures = [];
+const require = createRequire(import.meta.url);
+const coreRequire = createRequire(require.resolve('@docusaurus/core/package.json'));
+const utilsRequire = createRequire(coreRequire.resolve('@docusaurus/utils/package.json'));
+const yaml = utilsRequire('js-yaml');
 function check(condition, message) {
   if (!condition) failures.push(message);
 }
@@ -26,6 +31,11 @@ for (const key of checkpoint.backendEnvironmentKeys) {
 }
 const compose = readFileSync(join(root, 'static/downloads/docker-compose.yml'));
 check(createHash('sha256').update(compose).digest('hex') === checkpoint.composeSha256, 'Downloadable Compose differs from the verified server file');
+const services = yaml.load(compose.toString('utf8')).services;
+for (const [service, image] of Object.entries(checkpoint.composeImages)) {
+  check(services[service]?.image === image, `Incorrect image repository/tag for ${service}`);
+  check(!services[service]?.build, `Production Compose must download a prebuilt ${service} image`);
+}
 for (const file of checkpoint.requiredGuides) {
   check(read(file).trim().length > 150, `Missing/incomplete guide ${file}`);
 }

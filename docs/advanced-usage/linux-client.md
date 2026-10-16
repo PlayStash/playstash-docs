@@ -6,7 +6,7 @@ sidebar_position: 3
 
 Use the native cross-platform .AppImage or .deb from
 [frontend releases](https://github.com/PlayStash/playstash-frontend/releases).
-GitHub sign-in and private repository access are required.
+Published frontend release packages are public and require no GitHub sign-in.
 
 AppImage includes the build's media framework. Debian packages are installed and
 updated manually. Desktop packages are Linux x64; server AMD64/ARM64 images do

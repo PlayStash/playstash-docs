@@ -15,6 +15,10 @@ The public port belongs to the frontend. The backend and PostgreSQL remain on th
 
 See the [Compose guide](docker-compose.md) for storage, updates, backups and public image tags, and [reverse proxy guide](reverse-proxy.md) for HTTPS.
 
+The web image is published by `playstash-frontend`; the API and PostgreSQL images
+are published by `playstash-backend`. After installation, updates are
+`docker compose pull` followed by `docker compose up -d` from the same directory.
+
 ## NAS and managed platforms
 
 Use the same Compose file on [Synology](synology-container-manager.md), [Unraid](unraid.md) or [TrueNAS](truenas-scale.md) when your platform supports a complete Compose project. If it does not, run the stack in a Linux VM. A single-container vendor template cannot represent this deployment.

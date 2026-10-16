@@ -4,11 +4,27 @@ sidebar_position: 6
 
 # Security checks and maintenance
 
-Product release pipelines audit dependencies, scan secrets and test the actual
-runtime images. Backend 17.1.4 main/dev publication produced twelve zero-finding
-image reports on 14 October 2026: three images on AMD64/ARM64 for both branches.
-Keep the [server updated](server-docs/setup/docker-compose.md) and preserve
-private data and backups. New advisories can change a dated result.
+The frontend and backend repositories run their own dependency/secret checks and
+container pipelines. The frontend scans the web image it publishes at
+`ghcr.io/playstash/playstash-frontend`; the backend scans its API and PostgreSQL
+images at `ghcr.io/playstash/playstash-backend`.
+
+Backend integration checks also resolve the matching published frontend channel
+to an immutable digest, scan it, and test the full Compose stack with that image.
+
+The container workflows build and test Linux AMD64 and ARM64 variants. Runtime
+vulnerability gates include UNKNOWN, LOW, MEDIUM, HIGH and CRITICAL findings,
+without an advisory ignore list or an unfixed-vulnerability exemption. Frontend
+publication verifies provenance, architecture manifests and anonymous manifest/blob
+access before advancing stable/development tags. Backend publication verifies
+anonymous image access before publishing its GitHub release. See
+[product builds](advanced-usage/development.md#product-builds)
+for the publisher and tag mapping.
+
+Keep the [server updated](server-docs/setup/docker-compose.md#status-updates-and-stopping)
+by running `docker compose pull` and `docker compose up -d`, and preserve private
+data and backups. Use the current Compose with its separate frontend image.
+A previous clean scan is dated evidence; new advisories can change its result.
 
 The documentation build also audits production and development dependencies at
 all severities. Inherited website packages were updated without advisory ignores.
@@ -24,9 +40,11 @@ immutable historical findings are documented truncated JWT examples ending in
 an ellipsis, excluded by commit/path/rule/line fingerprints. No real credentials
 or future findings are excluded by that exception.
 
-Source stays private. Website builds are private Actions artifacts; there is no
-automatic public documentation deployment. Hosted checks remain enabled while
-self-hosted execution defaults to false.
+Frontend and backend source repositories and their published releases are public.
+The documentation and other PlayStash repositories remain private. Documentation
+website builds are private Actions artifacts; there is no automatic public
+documentation deployment. Hosted checks remain enabled while self-hosted
+execution defaults to false.
 
 The full product review remains in each product repository. Read
 [privacy](privacy.md) for data collection and external connections, and

@@ -6,13 +6,13 @@ sidebar_position: 5
 
 ## Help improve PlayStash
 
-Frontend 17.2.3 stores this preference locally as app_analytics_consent.
+The frontend stores this preference locally as app_analytics_consent.
 It does not configure a destination.
 
 Analytics starts only if the frontend was built with both
 VITE_PLAYSTASH_ANALYTICS_PROJECT_ID and VITE_PLAYSTASH_ANALYTICS_API_URL and the
 local preference permits it. It calls Swetrix trackViews and trackErrors at the
-operator-selected URL. The supplied release workflow sets neither value, so the
+operator-selected URL. The supplied frontend build workflows set neither value, so the
 published frontend does not send these analytics.
 
 These are frontend build-time values. Runtime backend/Nginx environment settings

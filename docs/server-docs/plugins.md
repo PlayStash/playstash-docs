@@ -17,7 +17,7 @@ The plugin folder belongs only to the backend; do not put plugins in the fronten
 
 ## Develop
 
-Use the current [example plugins repository](https://github.com/PlayStash/playstash-backend-example-plugins) and backend [development instructions](https://github.com/PlayStash/playstash-backend/blob/main/INSTALL.md). The source repositories are private and require GitHub access.
+Use the current [example plugins repository](https://github.com/PlayStash/playstash-backend-example-plugins) and backend [development instructions](https://github.com/PlayStash/playstash-backend/blob/main/INSTALL.md). The example plugins repository is private and requires GitHub access; the backend source is public.
 
 A plugin default-exports a NestJS module class implementing `PlayStashPluginModule`. Its metadata implements `PlayStashPluginModuleMetadataV1`; both interfaces are defined in [src/globals.ts](https://github.com/PlayStash/playstash-backend/blob/main/src/globals.ts). Metadata includes its name, author and optional version, description, website, license, keywords and plugin dependencies.
 

@@ -4,7 +4,13 @@ sidebar_position: 2
 
 # Configuration
 
-This reference follows backend **17.1.4** and the server deployment containing frontend **17.2.3**. The production Compose stack uses PostgreSQL and separate API/frontend containers. Backend settings come from [configuration.ts](https://github.com/PlayStash/playstash-backend/blob/main/src/configuration.ts).
+This reference describes backend settings for the PostgreSQL Compose stack with
+separate API and frontend containers. The frontend image is published separately
+by its own repository; its version does not change backend environment defaults.
+Backend settings come from [configuration.ts](https://github.com/PlayStash/playstash-backend/blob/main/src/configuration.ts).
+See [the deployment guide](setup/docker-compose.md) for current images and the
+[verification checkpoint](../advanced-usage/development.md#verified-checkpoint)
+for the reviewed source versions.
 
 ## Add a backend setting
 

@@ -39,8 +39,10 @@ See [server setup](server-docs/setup/setup.md).
 
 ## Desktop
 
-Private feeds cannot be read by the anonymous updater; install signed-in GitHub
-downloads manually. Browsers cannot run native installation/launch actions.
+The frontend's signed updater feeds are public. Check the selected channel,
+available platform package and updater error; manual frontend release downloads
+are also public. The separate Windows application still requires access to its
+private GitHub repository. Browsers cannot run native installation/launch actions.
 Verify executable, installation directory and Wine/Proton settings and inspect logs.
 
 Report client/server versions, OS, steps and redacted logs. Never send credentials.

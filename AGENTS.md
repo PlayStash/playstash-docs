@@ -8,8 +8,10 @@ requirements, old registry names or removed configuration as current PlayStash.
 - Document user-facing changes in `CHANGELOG.md` under the current version.
 - Stable and development branches are `main` and `dev`; keep both synchronized
   when publishing documentation. Do not create extra remote branches.
-- The source repository is private. Public container downloads do not make source
-  code, private releases or a documentation website public.
+- This documentation repository is private and has no public website deployment.
+  Frontend and backend source repositories and their published releases are public;
+  the other PlayStash repositories remain private. Container package visibility
+  is configured separately from source repository visibility.
 - Production uses PostgreSQL and separate frontend/API containers in one Compose.
 - Provider credentials belong to the backend. `.env` values reach a container
   only when the Compose file references or passes them.

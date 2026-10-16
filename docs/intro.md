@@ -8,9 +8,12 @@ PlayStash is a self-hosted library for organizing, downloading and playing your
 DRM-free games. Your server stores games, metadata, users and saves. Browser and
 desktop clients connect to that server.
 
-Checked against Backend **17.1.4**, Web/Desktop Frontend **17.2.3** and Windows
-application **1.18.1** on **14 October 2026**. All library features are available
-without a subscription. Roles, activation, age restrictions and game access apply.
+Current deployment examples use Backend **17.1.5** and Frontend **17.3.2**, with
+independently published frontend and backend images. The [verification
+checkpoint](advanced-usage/development.md#verified-checkpoint) distinguishes the
+deployment review from earlier client-feature reviews. All library features are
+available without a subscription. Roles, activation, age restrictions and game
+access apply.
 
 ## Start here
 
@@ -25,17 +28,18 @@ without a subscription. Roles, activation, age restrictions and game access appl
 
 ## Repositories
 
-| Repository | Purpose |
-| --- | --- |
-| [playstash-backend](https://github.com/PlayStash/playstash-backend) | API, database, providers and server images |
-| [playstash-frontend](https://github.com/PlayStash/playstash-frontend) | Web interface and Windows/Linux/macOS desktop |
-| [playstash-app](https://github.com/PlayStash/playstash-app) | Separate Windows application |
-| [playstash-docs](https://github.com/PlayStash/playstash-docs) | This documentation |
-| [playstash-playnite-integration](https://github.com/PlayStash/playstash-playnite-integration) | Playnite extension |
-| [playstash-community-themes](https://github.com/PlayStash/playstash-community-themes) | Windows application themes |
-| [playstash-backend-example-plugins](https://github.com/PlayStash/playstash-backend-example-plugins) | Backend plugin examples |
+| Repository | Visibility | Purpose |
+| --- | --- | --- |
+| [playstash-backend](https://github.com/PlayStash/playstash-backend) | Public | API, database, providers and API/PostgreSQL images |
+| [playstash-frontend](https://github.com/PlayStash/playstash-frontend) | Public | Web image, web interface and Windows/Linux/macOS desktop |
+| [playstash-app](https://github.com/PlayStash/playstash-app) | Private | Separate Windows application |
+| [playstash-docs](https://github.com/PlayStash/playstash-docs) | Private | This documentation |
+| [playstash-playnite-integration](https://github.com/PlayStash/playstash-playnite-integration) | Private | Playnite extension |
+| [playstash-community-themes](https://github.com/PlayStash/playstash-community-themes) | Private | Windows application themes |
+| [playstash-backend-example-plugins](https://github.com/PlayStash/playstash-backend-example-plugins) | Private | Backend plugin examples |
 
-Source repositories and releases remain private. Public container visibility
-allows anonymous image downloads independently of source visibility. GitHub
-sign-in with repository access is required for private documentation and installers.
+Frontend and backend sources and published releases are public. Their GHCR
+packages also allow anonymous image downloads. The documentation and other
+repositories remain private; GitHub sign-in with repository access is required
+for their contents and release assets, including the separate Windows application.
 Only main and dev are maintained. See [maintenance](advanced-usage/development.md).

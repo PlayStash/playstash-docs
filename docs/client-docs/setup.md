@@ -5,7 +5,8 @@ sidebar_position: 1
 
 Choose a browser session, the cross-platform desktop client, or the separate
 Windows application. These are different clients with different local features.
-This guide covers frontend 17.2.3 and Windows application 1.18.1.
+The web image and cross-platform desktop packages come from the frontend
+repository. The separate Windows application keeps its own release version.
 
 ## Installation
 
@@ -15,9 +16,10 @@ This guide covers frontend 17.2.3 and Windows application 1.18.1.
 | Cross-platform desktop client, built with Tauri | Windows x64, Linux x64, macOS ARM64 and Intel | `playstash-frontend` Releases |
 | Windows application, built with WPF | Windows 11 or newer, x64 | `playstash-app` Releases |
 
-The source repositories and release assets are private. Sign in to GitHub with an
-account that has access before opening their release pages. Public Docker images
-allow anonymous server installation; they do not make desktop installers public.
+The frontend repository and its published Windows/Linux/macOS installers are
+public. The separate Windows application in `playstash-app` remains private;
+sign in to GitHub with an account that has access to download its releases.
+Public Docker images allow anonymous server installation.
 
 ### Cross-platform client
 
@@ -31,7 +33,7 @@ Download a package from [PlayStash frontend Releases](https://github.com/PlaySta
 Install the package, then launch PlayStash. The client uses the same interface as
 the browser, with native downloads, extraction, installation and launch features.
 A desktop package does not make a game compatible with every operating system.
-See [Updating the client](./updating-client.md) for the current manual update process.
+See [Updating the client](./updating-client.md) for signed updater and manual updates.
 
 ### Web UI
 
@@ -39,6 +41,12 @@ Open your server's public address, such as `https://games.example.com` or
 `http://SERVER-IP:8080`. The Compose frontend container serves the interface and
 forwards API and WebSocket requests to the separate backend container. You do not
 need a separate public backend address.
+
+The service runs `ghcr.io/playstash/playstash-frontend:latest`, published by the
+frontend repository. The server operator updates that image with
+`docker compose pull` and `docker compose up -d`; browser users then reload the
+page. See [server installation](../server-docs/setup/docker-compose.md) for the
+complete stack and current tags.
 
 A browser can browse games, use account and administration features, download
 files, and upload or download save archives. It cannot run the native game's

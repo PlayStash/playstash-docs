@@ -6,7 +6,7 @@ sidebar_position: 9
 
 For a production installation, use [the prebuilt Compose stack](docker-compose.md). Source development is a separate workflow: the backend exposes an API, and the web interface runs from the frontend repository.
 
-The private repositories require GitHub access. Follow the backend's [INSTALL.md](https://github.com/PlayStash/playstash-backend/blob/main/INSTALL.md) for Node.js LTS and pnpm prerequisites:
+The frontend and backend source repositories are public. Follow the backend's [INSTALL.md](https://github.com/PlayStash/playstash-backend/blob/main/INSTALL.md) for Node.js LTS and pnpm prerequisites:
 
 ```sh
 git clone https://github.com/PlayStash/playstash-backend.git

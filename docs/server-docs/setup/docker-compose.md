@@ -46,22 +46,29 @@ for browser routes. Browser requests use the same public address. Authentication
 WebSocket upgrades, streaming uploads and ranged downloads pass through this
 proxy. PostgreSQL and the backend need no externally published ports.
 
-All three image families live in the existing public GHCR package
-`ghcr.io/playstash/playstash-backend`, with distinct tags:
+The frontend repository builds and publishes its own web image. The backend
+repository builds the API/initializer and PostgreSQL images. Both image packages
+are public for anonymous downloads. Frontend and backend source repositories and
+their published releases are public too. The documentation and other PlayStash
+repositories remain private.
 
-| Image                   | Stable       | Development      | Pinned release example |
-| ----------------------- | ------------ | ---------------- | ---------------------- |
-| Backend and initializer | `latest`     | `dev`            | `v17.1.4`              |
-| Frontend                | `frontend`   | `frontend-dev`   | `frontend-v17.1.4`     |
-| PostgreSQL              | `postgres16` | `postgres16-dev` | `postgres16-v17.1.4`   |
+| Role | Image repository | Stable tag | Development tag | Pinned version example |
+| --- | --- | --- | --- | --- |
+| Frontend | `ghcr.io/playstash/playstash-frontend` | `latest` | `dev` | `v17.3.2` |
+| Backend and initializer | `ghcr.io/playstash/playstash-backend` | `latest` | `dev` | `v17.1.5` |
+| PostgreSQL | `ghcr.io/playstash/playstash-backend` | `postgres16` | `postgres16-dev` | `postgres16-v17.1.5` |
 
-The frontend runtime definition and web build come from a pinned release of the
-separate frontend repository. Its source commit, checksums and licenses are
-verified before building and preserved in `/opt/playstash/frontend/` in the
-frontend image. A frontend repository push does not alter an already published
-server release. GitHub tests the complete deployment and scans all three runtime
-images on both architectures before publishing a stable server release. Source
-repositories remain private; public image visibility allows anonymous downloads.
+Each repository builds automatically on `main`, `dev`, matching version tags and
+manual workflow dispatch using GitHub-hosted runners. Main advances its stable
+image after checks pass; dev advances its development image. Version tags are
+immutable. A frontend update can therefore reach the web interface independently
+of an API release. The frontend image records its own source commit, version and
+license notices; the version number belongs to the frontend application.
+
+CI checks both AMD64 and ARM64 runtime images. See [product builds and their
+checks](../../advanced-usage/development.md#product-builds) for the independent
+publication workflows and [security maintenance](../../security.md) for image
+scans. The server downloads these finished images and needs no build tools.
 
 ## Reverse proxy
 
@@ -140,12 +147,21 @@ backend starts, and the frontend starts after the API is healthy. The database,
 backend and frontend each have health checks. The initial startup can take a
 short time while the empty database is prepared.
 
-The standard Compose file follows stable releases and checks for updates on each
-start. Apply an available update from the same directory with:
+The supplied Compose follows the stable frontend, backend and PostgreSQL tags.
+From the same installation directory, download and apply their latest checked
+images with:
 
 ```sh
+docker compose pull
 docker compose up -d
 ```
+
+The frontend service must use `ghcr.io/playstash/playstash-frontend:latest`.
+If you installed an older Compose with a frontend tag in the backend package,
+replace that service's `image` entry or download the current Compose file first.
+Preserve your environment additions, port/proxy settings, bind mounts and data.
+The two update commands then replace the frontend independently when its main
+build has published a new image. Reload the browser once the services are healthy.
 
 `docker compose down` removes containers and the network, retaining host data.
 Start again with `docker compose up -d`. Keep the same installation directory and
@@ -158,4 +174,7 @@ keys. API documentation is available at `/api/docs`.
 
 Provider settings belong to `playstash-backend.environment`. See [metadata enrichment](../metadata-enrichment/metadata.md) for Steam and IGDB, [configuration](../configuration.md) for the complete settings, and [user management](../user-management.md) for registration and roles. Add settings under the existing backend environment block, then run `docker compose up -d`. A variable in a local `.env` reaches a container only if Compose explicitly references or passes it.
 
-The release bundle currently pairs backend 17.1.4 with frontend 17.2.3. The `frontend-v17.1.4` tag identifies the complete server release, rather than the frontend application version.
+The pinned examples above pair backend 17.1.5 and frontend 17.3.2. When pinning,
+set both the backend and initializer to `v17.1.5`, PostgreSQL to
+`postgres16-v17.1.5`, and the separate frontend image to `v17.3.2`. Choose a
+compatible set deliberately; a fixed version tag does not follow new main pushes.

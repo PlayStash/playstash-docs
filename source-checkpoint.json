@@ -4,7 +4,7 @@
   "backendVersion": "17.1.5",
   "backendReleaseCommit": "0c2c486928e45834de4e63faaac7f151d8d7b43c",
   "frontendVersion": "17.3.2",
-  "frontendReleaseCommit": "ee9ba6669e438f47e7e35f8dc49e649bee145d46",
+  "frontendReleaseCommit": "29582d2a27a75b02c1210fab0d0ba9253f09ef84",
   "repositoryVisibility": {
     "playstash-frontend": "public",
     "playstash-backend": "public",

@@ -40,11 +40,11 @@ immutable historical findings are documented truncated JWT examples ending in
 an ellipsis, excluded by commit/path/rule/line fingerprints. No real credentials
 or future findings are excluded by that exception.
 
-Frontend and backend source repositories and their published releases are public.
-The documentation and other PlayStash repositories remain private. Documentation
-website builds are private Actions artifacts; there is no automatic public
-documentation deployment. Hosted checks remain enabled while self-hosted
-execution defaults to false.
+Frontend, backend and documentation source repositories are public, as are the
+frontend and backend published releases. The other PlayStash repositories remain
+private. Only a main build that passed the build workflow's audit, content and
+link checks is deployed to the public documentation website on GitHub Pages.
+Hosted checks remain enabled while self-hosted execution defaults to false.
 
 The full product review remains in each product repository. Read
 [privacy](privacy.md) for data collection and external connections, and

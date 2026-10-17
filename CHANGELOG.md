@@ -4,11 +4,12 @@
 
 ### Changes
 
+- The documentation repository is public and main publishes the checked website to GitHub Pages at <https://playstash.github.io/playstash-docs/>; dev and pull requests are only built and checked.
 - The license page and README point to `NOTICE.txt` for the attribution.
 - Documented independent frontend and backend container publication, current image repositories/tags, automatic hosted builds, and server updates using Compose pull/up without building source.
-- Updated repository/download visibility: frontend and backend sources and published releases are public, including signed Tauri updater feeds; documentation and the other repositories remain private.
+- Updated repository/download visibility: frontend and backend sources and published releases are public, including signed Tauri updater feeds; repositories other than frontend, backend and documentation remain private.
 - Documented Tauri 17.3.1 local `.ludusavi.yaml` detection in versioned installation folders, save/config examples, opt-in automatic sync and its server prerequisites and detection limits.
-- Imported documentation into the private PlayStash documentation repository with synchronized main and dev branches.
+- Imported documentation into the PlayStash documentation repository with synchronized main and dev branches.
 - Replaced obsolete branding, subscription requirements, vendor-store links and promotional content with current PlayStash guidance.
 - Documented separate frontend/API containers and PostgreSQL in one Compose, first administrator, registration controls, proxies, updates and backups.
 - Added the complete reference for all 98 backend configuration variables, their defaults, secret-file support and Compose environment forwarding.
@@ -16,7 +17,7 @@
 - Updated packages, extras/addons, launch profiles, restrictions, saves, requests, reviews, chat and administrator diagnostics.
 - Documented Windows/Linux/macOS installers, signed Tauri update channels and access requirements for private Windows-application downloads.
 - Added privacy guidance for optional analytics, own-server game metrics, external providers, fonts and logs.
-- Added hosted website builds and dependency/secret checks, with self-hosted execution disabled and no automatic public deployment.
+- Added hosted website builds and dependency/secret checks, with self-hosted execution disabled.
 - Documentation artifacts are checked for valid links, anchors, local search, original legal notices and the exact published Compose download.
 - Patched inherited vulnerable website dependencies and bounded brace-pattern/AST recursion with a pinned, tested local backport where no upstream fixed release exists.
 - Preserved source history, original author attribution and the original license.

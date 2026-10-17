@@ -33,13 +33,14 @@ access apply.
 | [playstash-backend](https://github.com/PlayStash/playstash-backend) | Public | API, database, providers and API/PostgreSQL images |
 | [playstash-frontend](https://github.com/PlayStash/playstash-frontend) | Public | Web image, web interface and Windows/Linux/macOS desktop |
 | [playstash-app](https://github.com/PlayStash/playstash-app) | Private | Separate Windows application |
-| [playstash-docs](https://github.com/PlayStash/playstash-docs) | Private | This documentation |
+| [playstash-docs](https://github.com/PlayStash/playstash-docs) | Public | This documentation |
 | [playstash-playnite-integration](https://github.com/PlayStash/playstash-playnite-integration) | Private | Playnite extension |
 | [playstash-community-themes](https://github.com/PlayStash/playstash-community-themes) | Private | Windows application themes |
 | [playstash-backend-example-plugins](https://github.com/PlayStash/playstash-backend-example-plugins) | Private | Backend plugin examples |
 
 Frontend and backend sources and published releases are public. Their GHCR
-packages also allow anonymous image downloads. The documentation and other
-repositories remain private; GitHub sign-in with repository access is required
-for their contents and release assets, including the separate Windows application.
+packages also allow anonymous image downloads. The documentation source is
+public too. The other repositories remain private; GitHub sign-in with repository
+access is required for their contents and release assets, including the separate
+Windows application.
 Only main and dev are maintained. See [maintenance](advanced-usage/development.md).

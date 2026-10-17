@@ -1,7 +1,8 @@
 # PlayStash Documentation
 
-This private repository contains current PlayStash documentation and its
-Docusaurus website source. Start with [the overview](docs/intro.md) or
+This repository contains current PlayStash documentation and its Docusaurus
+website source, published at <https://playstash.github.io/playstash-docs/>.
+Start with [the overview](docs/intro.md) or
 [server installation](docs/server-docs/setup/setup.md).
 
 The deployment uses independently published frontend and API images, PostgreSQL,
@@ -36,8 +37,9 @@ pnpm check:site
 ```
 
 GitHub-hosted workflows check dependencies, secrets, content and the production
-website on main/dev and pull requests. They upload a private Actions artifact.
-No public website is deployed automatically; the default URL is a build setting.
+website on main/dev and pull requests and upload the build as an Actions
+artifact. When the build workflow's checks pass on main, that build is deployed
+to GitHub Pages; dev and pull requests are not published.
 
 Only main and dev are maintained and synchronized. PLAYSTASH_RUN_SELF_HOSTED
 is false; it does not block hosted jobs. Read [AGENTS.md](AGENTS.md) and update

@@ -8,7 +8,7 @@
   "repositoryVisibility": {
     "playstash-frontend": "public",
     "playstash-backend": "public",
-    "playstash-docs": "private"
+    "playstash-docs": "public"
   },
   "importedDocumentationCommit": "c3cbde9bd5af111efb02e1cf4994b966ed19ba22",
   "composeSha256": "fe22bf8b8bf7370aa75df2a85042972e874a844569bbdcfbc02c136241571cd9",

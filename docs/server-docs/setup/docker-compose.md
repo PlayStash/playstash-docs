@@ -49,8 +49,8 @@ proxy. PostgreSQL and the backend need no externally published ports.
 The frontend repository builds and publishes its own web image. The backend
 repository builds the API/initializer and PostgreSQL images. Both image packages
 are public for anonymous downloads. Frontend and backend source repositories and
-their published releases are public too. The documentation and other PlayStash
-repositories remain private.
+their published releases are public too, as is the documentation. The other
+PlayStash repositories remain private.
 
 | Role | Image repository | Stable tag | Development tag | Pinned version example |
 | --- | --- | --- | --- | --- |

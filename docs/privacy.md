@@ -52,8 +52,9 @@ rooms require game access.
 
 Providers see the server's connection and search terms/selected IDs. Browser
 services see the browser's connection. Find Images opens an external search;
-it does not install an automatic provider. The documentation website has no
-analytics or upstream demo widgets.
+it does not install an automatic provider. The documentation website is served
+by GitHub Pages, which receives visitors' connections; it has no analytics or
+upstream demo widgets.
 
 ## Logs
 

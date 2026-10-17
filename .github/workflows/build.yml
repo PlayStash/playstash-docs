@@ -12,7 +12,8 @@ permissions:
 
 concurrency:
   group: docs-build-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  # Let a running main build finish its Pages deployment instead of cancelling it.
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
   build:
@@ -45,3 +46,23 @@ jobs:
           path: build/
           if-no-files-found: error
           retention-days: 30
+      - name: Prepare the checked website for GitHub Pages
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: build/
+
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Publish the website from main
+        id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

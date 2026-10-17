@@ -76,8 +76,9 @@ security and clients, and update the verified version checkpoint.
 Historical issue/branch reports are evidence, not current install instructions.
 
 Run frozen installation, content checks, full audit, secret scan and production
-Docusaurus build with broken links treated as errors. Main/dev upload private
-website artifacts. No public deployment or extra hosting branch is configured.
+Docusaurus build with broken links treated as errors. Main/dev upload website
+artifacts. Main deploys its checked build to GitHub Pages through Actions; no
+extra hosting branch is used.
 
 ## Verified checkpoint
 
